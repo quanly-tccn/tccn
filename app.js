@@ -1,3 +1,34 @@
+// Danh mục cho từng loại giao dịch
+const categories = {
+    expense: [
+        { value: 'food', label: '🍜 Ăn uống' },
+        { value: 'transport', label: '🚗 Di chuyển' },
+        { value: 'shopping', label: '🛍️ Mua sắm' },
+        { value: 'bills', label: '📄 Hóa đơn' },
+        { value: 'entertainment', label: '🎮 Giải trí' },
+        { value: 'health', label: '💊 Y tế' },
+        { value: 'education', label: '📚 Giáo dục' },
+        { value: 'other', label: '📦 Khác' }
+    ],
+    income: [
+        { value: 'salary', label: '💰 Lương' },
+        { value: 'bonus', label: '🎁 Thưởng' },
+        { value: 'investment', label: '📈 Đầu tư' },
+        { value: 'freelance', label: '💻 Freelance' },
+        { value: 'business', label: '🏪 Kinh doanh' },
+        { value: 'gift', label: '🎀 Quà tặng' },
+        { value: 'other_income', label: '📦 Thu nhập khác' }
+    ]
+};
+// Hàm cập nhật danh mục theo loại giao dịch
+function updateCategorySelect(type) {
+    const categorySelect = document.getElementById('category-select');
+    const categoriesList = categories[type] || categories.expense;
+    
+    categorySelect.innerHTML = categoriesList.map(cat => 
+        `<option value="${cat.value}">${cat.label}</option>`
+    ).join('');
+}
 // Dữ liệu mẫu
 const sampleTransactions = [
     {
@@ -63,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCharts();
     renderTransactions();
     setDefaultDate();
+    updateCategorySelect('expense');  // ← Thêm dòng này để khởi tạo danh mục mặc định
 });
 
 // Navigation
@@ -146,12 +178,17 @@ function closeModal(modalId) {
 
 function selectType(type) {
     selectedType = type;
+    
+    // Cập nhật UI cho buttons
     document.querySelectorAll('.type-btn').forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.type === type) {
             btn.classList.add('active');
         }
     });
+    
+    // Cập nhật danh mục tương ứng
+    updateCategorySelect(type);
 }
 
 // Transaction functions
@@ -166,23 +203,16 @@ function saveTransaction() {
         return;
     }
     
-    const categoryMap = {
-        food: { name: 'Ăn uống', icon: '🍜' },
-        transport: { name: 'Di chuyển', icon: '🚗' },
-        shopping: { name: 'Mua sắm', icon: '🛍️' },
-        bills: { name: 'Hóa đơn', icon: '📄' },
-        entertainment: { name: 'Giải trí', icon: '🎮' },
-        health: { name: 'Y tế', icon: '💊' },
-        education: { name: 'Giáo dục', icon: '📚' },
-        other: { name: 'Khác', icon: '📦' }
-    };
+    // Tìm thông tin danh mục dựa trên selectedType và category value
+    const categoriesList = categories[selectedType] || categories.expense;
+    const selectedCategory = categoriesList.find(cat => cat.value === category);
     
     const newTransaction = {
         id: Date.now(),
         type: selectedType,
         category: category,
-        categoryName: categoryMap[category].name,
-        icon: categoryMap[category].icon,
+        categoryName: selectedCategory ? selectedCategory.label.split(' ').slice(1).join(' ') : 'Khác',
+        icon: selectedCategory ? selectedCategory.label.split(' ')[0] : '📦',
         amount: amount,
         note: note || 'Không có ghi chú',
         date: date
@@ -196,6 +226,7 @@ function saveTransaction() {
     document.getElementById('amount-input').value = '';
     document.getElementById('note-input').value = '';
     setDefaultDate();
+    selectType('expense');  // Reset về mặc định là chi tiêu
     
     // Hiển thị thông báo thành công
     showNotification('Đã thêm giao dịch thành công!');

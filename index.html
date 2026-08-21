@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- App Container -->
@@ -150,11 +151,7 @@
                             <h3>Chi tiêu theo danh mục</h3>
                             <canvas id="categoryChart"></canvas>
                         </div>
-                        <div class="chart-card">
-                            <h3>Xu hướng 6 tháng</h3>
-                            <canvas id="trendChart"></canvas>
                         </div>
-                    </div>
                     
                     <!-- Recent Transactions -->
                     <div class="recent-transactions">
@@ -270,14 +267,7 @@
                             <i class="fas fa-download"></i> Xuất PDF
                         </button>
                     </div>
-                    
-                    <div class="report-charts">
-                        <div class="chart-card large">
-                            <h3>So sánh thu nhập và chi tiêu</h3>
-                            <canvas id="comparisonChart"></canvas>
-                        </div>
-                        
-                        <div class="chart-card">
+                    <div class="chart-card">
                             <h3>Top 5 khoản chi tiêu</h3>
                             <div class="top-expenses">
                                 <div class="expense-item">
@@ -302,6 +292,20 @@
                                 </div>
                             </div>
                         </div>
+                    <div class="chart-card large">
+                        <h3>So sánh thu nhập và chi tiêu</h3>
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+
+                    <div class="report-charts">
+                        <!--Xu hướng 6 tháng vào đây -->
+                    <div class="chart-card">
+                        <h3>Xu hướng 6 tháng</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                        
+                        
+                        
                     </div>
                 </div>
                 
@@ -445,14 +449,7 @@
                 <div class="form-group">
                     <label>Danh mục</label>
                     <select class="form-input" id="category-select">
-                        <option value="food">🍜 Ăn uống</option>
-                        <option value="transport">🚗 Di chuyển</option>
-                        <option value="shopping">🛍️ Mua sắm</option>
-                        <option value="bills">📄 Hóa đơn</option>
-                        <option value="entertainment">🎮 Giải trí</option>
-                        <option value="health">💊 Y tế</option>
-                        <option value="education">📚 Giáo dục</option>
-                        <option value="other">📦 Khác</option>
+                     <!-- Danh mục sẽ được JavaScript tự động cập nhật -->
                     </select>
                 </div>
                 

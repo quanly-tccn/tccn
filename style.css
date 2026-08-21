@@ -335,11 +335,16 @@ body {
     border-radius: 12px;
     padding: 20px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 15px;
     box-shadow: var(--shadow);
     transition: var(--transition);
     flex-direction: row;  /* ← Đảm bảo nằm ngang */
+}
+
+.card-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .card:hover {
@@ -381,16 +386,19 @@ body {
     font-size: 0.85rem;
     color: var(--text-secondary);
     margin-bottom: 5px;
+    font-weight: 500;
 }
 
 .card-value {
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 5px;
+    line-height: 1.2;
 }
 
 .card-change {
     font-size: 0.8rem;
+    line-height: 1.3;
 }
 
 .card-change.positive {
@@ -917,6 +925,7 @@ body {
     max-height: 90vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
+    font-family: 'Be Vietnam Pro', sans-serif;  /* ← Thêm font */
 }
 
 @keyframes slideUp {
@@ -965,6 +974,7 @@ body {
     cursor: pointer;
     font-weight: 600;
     font-size: 1.1rem;  /* ← Tăng lên 1.1rem */
+    font-family: 'Be Vietnam Pro', sans-serif;
     transition: var(--transition);
 }
 
@@ -983,6 +993,8 @@ body {
     margin-bottom: 5px;
     font-weight: 600;
     font-size: 0.9rem;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    color: #4a5568;
 }
 
 .form-input {
@@ -991,7 +1003,8 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
-    font-family: inherit;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    transition: var(--transition);
     box-sizing: border-box;  /* ← Thêm dòng này */
 }
 
@@ -1017,11 +1030,12 @@ input[type="date"].form-input {
 /* Nút Hủy trong bảng Thêm giao dịch mới */
 .cancel-btn,
 .save-btn {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
-    font-size: 1.1rem;  /* ← Tăng lên 1.1rem */
+    font-weight: 500;
+    font-size: 1rem;
+    font-family: 'Be Vietnam Pro', sans-serif;
     transition: var(--transition);
 }
 
@@ -1091,10 +1105,17 @@ input[type="date"].form-input {
         gap: 10px;
     }
     
+    .card {
+        padding: 15px;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+
     .card-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
+        width: 25px;
+        height: 25px;
+        font-size: 1rem;
         flex-shrink: 0;  /* ← Không cho icon bị co lại */
     }
     card-info {
@@ -1103,6 +1124,7 @@ input[type="date"].form-input {
     }
     .card-label {
         font-size: 0.75rem;
+        margin-bottom: 3px;
     }
     
     .card-value {
@@ -1257,4 +1279,21 @@ canvas {
         width: 100%;
         max-width: 100%;
     }
+}
+/* Đảm bảo chart có chiều cao phù hợp */
+.chart-card {
+    position: relative;
+    height: auto;
+    min-height: 350px;
+}
+
+.chart-card canvas {
+    max-height: 300px !important;
+    width: 100% !important;
+}
+
+/* Chart lớn hơn cho báo cáo */
+.chart-card.large canvas {
+    max-height: 400px !important;
+    min-height: 300px !important;
 }
