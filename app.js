@@ -97,7 +97,7 @@ function switchPage(pageName) {
         targetPage.classList.add('active');
     } else {
         console.error(`Page "${pageName}" không tồn tại!`);
-        return; // Thoát nếu không tìm thấy page
+        return;
     }
     
     // Update title
@@ -115,9 +115,10 @@ function switchPage(pageName) {
         titleElement.textContent = pageTitles[pageName] || pageName;
     }
     
-    // Close sidebar on mobile
+    // Đóng sidebar trên mobile (quan trọng!)
     if (window.innerWidth <= 768) {
-        toggleSidebar(false);
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.remove('active');
     }
 }
 
