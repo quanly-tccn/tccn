@@ -83,6 +83,28 @@ const sampleTransactions = [
     }
 ];
 
+// Hàm format số với dấu phân cách
+function formatNumberInput(value) {
+    // Loại bỏ tất cả ký tự không phải số
+    let numbers = value.replace(/[^0-9]/g, '');
+    
+    // Thêm dấu phân cách hàng nghìn
+    return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+// Hàm xử lý khi nhập số tiền
+function handleAmountInput(event) {
+    const input = event.target;
+    const formattedValue = formatNumberInput(input.value);
+    input.value = formattedValue;
+}
+
+// Hàm lấy giá trị số từ input đã format
+function getAmountValue() {
+    const amountInput = document.getElementById('amount-input');
+    return parseFloat(amountInput.value.replace(/\./g, '')) || 0;
+}
+
 // State management
 let transactions = [...sampleTransactions];
 let currentPage = 'dashboard';
@@ -95,6 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTransactions();
     setDefaultDate();
     updateCategorySelect('expense');  // ← Thêm dòng này để khởi tạo danh mục mặc định
+    // Thêm event listener cho input số tiền
+    const amountInput = document.getElementById('amount-input');
+    if (amountInput) {
+        amountInput.addEventListener('input', handleAmountInput);
+    }
 });
 
 // Navigation
@@ -193,7 +220,8 @@ function selectType(type) {
 
 // Transaction functions
 function saveTransaction() {
-    const amount = parseFloat(document.getElementById('amount-input').value);
+    // Sử dụng getAmountValue() thay vì parseFloat trực tiếp
+    const amount = getAmountValue();
     const category = document.getElementById('category-select').value;
     const note = document.getElementById('note-input').value;
     const date = document.getElementById('date-input').value;
@@ -231,7 +259,21 @@ function saveTransaction() {
     // Hiển thị thông báo thành công
     showNotification('Đã thêm giao dịch thành công!');
 }
+function handleAmountInput(event) {
+    const input = event.target;
+    let value = input.value.replace(/[^0-9]/g, '');
+    
+    if (value) {
+        input.value = formatNumberInput(value) + ' đ';
+    } else {
+        input.value = '';
+    }
+}
 
+function getAmountValue() {
+    const amountInput = document.getElementById('amount-input');
+    return parseFloat(amountInput.value.replace(/[^0-9]/g, '')) || 0;
+}
 function renderTransactions() {
     const recentContainer = document.getElementById('recent-transactions');
     const allContainer = document.getElementById('all-transactions');
