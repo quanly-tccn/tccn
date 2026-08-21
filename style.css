@@ -990,6 +990,18 @@ body {
     border-radius: 8px;
     font-size: 0.9rem;
     font-family: inherit;
+    box-sizing: border-box;  /* ← Thêm dòng này */
+}
+
+/* Fix riêng cho input type date */
+input[type="date"].form-input {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .modal-footer {
