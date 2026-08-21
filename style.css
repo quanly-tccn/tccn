@@ -1143,11 +1143,15 @@ body {
     }
     
     .header-title {
-        font-size: 0.9rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 0.85rem;
+        white-space: normal;  /* ← Cho phép xuống dòng */
+        line-height: 1.2;
+        overflow: visible;
+        text-overflow: clip;
+        display: block;
+        text-align: center;
     }
+}
     
     .add-transaction-btn span {
         display: none;
@@ -1170,7 +1174,6 @@ body {
         height: 34px;
         font-size: 1rem;
     }
-}
 
 @media (max-width: 480px) {
     .header-left h1 {
