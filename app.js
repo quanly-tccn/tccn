@@ -92,17 +92,42 @@ function formatNumberInput(value) {
     return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
-// Hàm xử lý khi nhập số tiền
-function handleAmountInput(event) {
-    const input = event.target;
-    const formattedValue = formatNumberInput(input.value);
-    input.value = formattedValue;
+// Thêm event listener cho input số tiền
+function setupAmountInput() {
+    const amountInput = document.getElementById('amount-input');
+    
+    if (amountInput) {
+        // Xóa event listener cũ nếu có
+        amountInput.removeEventListener('input', handleAmountInput);
+        
+        // Thêm event listener mới
+        amountInput.addEventListener('input', function(e) {
+            // Lưu vị trí con trỏ
+            const cursorPos = this.selectionStart;
+            
+            // Lấy giá trị, loại bỏ dấu chấm
+            let value = this.value.replace(/\./g, '');
+            
+            // Loại bỏ ký tự không phải số
+            value = value.replace(/[^0-9]/g, '');
+            
+            // Format nếu có giá trị
+            if (value) {
+                this.value = parseInt(value, 10).toLocaleString('vi-VN');
+            } else {
+                this.value = '';
+            }
+            
+            // Đặt con trỏ ở cuối
+            const newPos = this.value.length;
+            this.setSelectionRange(newPos, newPos);
+        });
+    }
 }
-
-// Hàm lấy giá trị số từ input đã format
+// Hàm lấy giá trị số
 function getAmountValue() {
     const amountInput = document.getElementById('amount-input');
-    return parseFloat(amountInput.value.replace(/\./g, '')) || 0;
+    return parseInt(amountInput.value.replace(/\./g, '')) || 0;
 }
 
 // State management
@@ -259,14 +284,40 @@ function saveTransaction() {
     // Hiển thị thông báo thành công
     showNotification('Đã thêm giao dịch thành công!');
 }
+// Hàm xử lý input
 function handleAmountInput(event) {
     const input = event.target;
-    let value = input.value.replace(/[^0-9]/g, '');
     
+    // Cho phép xóa tự do
+    if (event.inputType === 'deleteContentBackward' || 
+        event.inputType === 'deleteContentForward') {
+        // Không format, để người dùng xóa tự nhiên
+        return;
+    }
+    
+    // Lấy giá trị, loại bỏ dấu chấm
+    let value = input.value.replace(/\./g, '');
+    value = value.replace(/[^0-9]/g, '');
+    
+    // Format nếu có giá trị
     if (value) {
-        input.value = formatNumberInput(value) + ' đ';
+        const formatted = parseInt(value, 10).toLocaleString('vi-VN');
+        input.value = formatted + ' đ';
+        
+         // Đặt con trỏ trước chữ "đ"
+        const pos = formatted.length;
+        input.setSelectionRange(pos, pos);
     } else {
         input.value = '';
+    }
+}
+
+// Khởi tạo
+function setupAmountInput() {
+    const amountInput = document.getElementById('amount-input');
+    
+    if (amountInput) {
+        amountInput.addEventListener('input', handleAmountInput);
     }
 }
 
