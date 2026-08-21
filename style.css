@@ -963,6 +963,7 @@ body {
     background: none;
     cursor: pointer;
     font-weight: 600;
+    font-size: 1.1rem;  /* ← Tăng lên 1.1rem */
     transition: var(--transition);
 }
 
@@ -1012,12 +1013,14 @@ input[type="date"].form-input {
     border-top: 1px solid var(--border-color);
 }
 
+/* Nút Hủy trong bảng Thêm giao dịch mới */
 .cancel-btn,
 .save-btn {
     padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 1.1rem;  /* ← Tăng lên 1.1rem */
     transition: var(--transition);
 }
 
@@ -1227,4 +1230,26 @@ input[type="date"].form-input {
 }
 canvas {
     max-height: 300px !important;
+}
+.modal-body input[type="date"] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+}
+/* ==================== FIX DATE INPUT MOBILE ==================== */
+@media (max-width: 768px) {
+    .form-input {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    
+    input[type="date"].form-input {
+        width: 100%;
+        max-width: 100%;
+    }
 }
