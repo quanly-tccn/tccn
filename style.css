@@ -339,6 +339,7 @@ body {
     gap: 15px;
     box-shadow: var(--shadow);
     transition: var(--transition);
+    flex-direction: row;  /* ← Đảm bảo nằm ngang */
 }
 
 .card:hover {
@@ -1084,8 +1085,8 @@ input[type="date"].form-input {
     }
     
     .card {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
         padding: 15px;
         gap: 10px;
     }
@@ -1094,8 +1095,12 @@ input[type="date"].form-input {
         width: 40px;
         height: 40px;
         font-size: 1.2rem;
+        flex-shrink: 0;  /* ← Không cho icon bị co lại */
     }
-    
+    card-info {
+        flex: 1;  /* ← Cho phép nội dung chiếm phần còn lại */
+        min-width: 0;  /* ← Cho phép text wrap */
+    }
     .card-label {
         font-size: 0.75rem;
     }
