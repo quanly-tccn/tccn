@@ -1296,3 +1296,12 @@ canvas {
     max-height: 400px !important;
     min-height: 300px !important;
 }
+
+/* Ngăn zoom trên mobile cho tất cả input */
+@media (max-width: 768px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
