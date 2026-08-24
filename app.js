@@ -317,6 +317,7 @@ function saveTransaction() {
     saveTransactions(); // Lưu vào LocalStorage
     renderTransactions();
     updateDashboardStats(); // Cập nhật số liệu mới
+    updateAllCharts();
     closeModal('transaction-modal');
     
     // Reset form
@@ -328,6 +329,7 @@ function saveTransaction() {
     // Hiển thị thông báo thành công
     showNotification('Đã thêm giao dịch thành công!');
 }
+
 // Hàm xử lý input
 function handleAmountInput(event) {
     const input = event.target;
@@ -442,6 +444,7 @@ function updateDashboardStats() {
         t.type === 'expense' && t.date.startsWith(getCurrentMonth())
     ).length;
     document.querySelector('.expense-card .card-change').textContent = `${expenseCount} giao dịch`;
+updateAllCharts();
 }
 
 function renderTransactions() {
@@ -511,85 +514,75 @@ function deleteTransaction(id) {
         saveTransactions(); // Lưu vào LocalStorage
         renderTransactions();
         updateDashboardStats(); // Cập nhật số liệu mới
+        updateAllCharts();
         showNotification('Đã xóa giao dịch!');
     }
 }
 
-// Chart functions
+// Khai báo biến toàn cục cho charts
+let categoryChart = null;
+let trendChart = null;
+let comparisonChart = null;
+
 function initCharts() {
-    // Category Chart - Biểu đồ cột
-const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-new Chart(categoryCtx, {
-    type: 'bar',
-    data: {
-        labels: ['Ăn uống', 'Di chuyển', 'Mua sắm', 'Hóa đơn', 'Giải trí'],
-        datasets: [{
-            label: 'Chi tiêu',
-            data: [1500000, 500000, 800000, 1000000, 700000],
-            backgroundColor: [
-                'rgba(59, 130, 246, 0.8)',
-                'rgba(16, 185, 129, 0.8)',
-                'rgba(245, 158, 11, 0.8)',
-                'rgba(239, 68, 68, 0.8)',
-                'rgba(139, 92, 246, 0.8)'
-            ],
-            borderColor: [
-                '#3b82f6',
-                '#10b981',
-                '#f59e0b',
-                '#ef4444',
-                '#8b5cf6'
-            ],
-            borderWidth: 2,
-            borderRadius: 8,
-            maxBarThickness: 50,
-            hoverBackgroundColor: [
-                'rgba(59, 130, 246, 1)',
-                'rgba(16, 185, 129, 1)',
-                'rgba(245, 158, 11, 1)',
-                'rgba(239, 68, 68, 1)',
-                'rgba(139, 92, 246, 1)'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return context.parsed.y.toLocaleString('vi-VN') + 'đ';
-                    }
-                }
-            }
+    // Category Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryData = calculateExpenseByCategory();
+    
+    categoryChart = new Chart(categoryCtx, {
+        type: 'bar',
+        data: {
+            labels: categoryData.labels,
+            datasets: [{
+                label: 'Chi tiêu',
+                data: categoryData.data,
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(236, 72, 153, 0.8)',
+                    'rgba(14, 165, 233, 0.8)',
+                    'rgba(168, 85, 247, 0.8)'
+                ],
+                borderRadius: 8,
+                maxBarThickness: 50
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return value / 1000000 + 'tr';
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value / 1000000 + 'tr';
+                        }
                     }
                 }
             }
         }
-    }
-});
+    });
     
     // Trend Chart
     const trendCtx = document.getElementById('trendChart').getContext('2d');
-    new Chart(trendCtx, {
+    const trendData = calculateSixMonthTrend();
+    
+    trendChart = new Chart(trendCtx, {
         type: 'line',
         data: {
-            labels: ['T8', 'T9', 'T10', 'T11', 'T12', 'T1'],
+            labels: trendData.months,
             datasets: [
                 {
                     label: 'Thu nhập',
-                    data: [18000000, 18000000, 20000000, 20000000, 20000000, 20000000],
+                    data: trendData.incomeData,
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     fill: true,
@@ -597,7 +590,7 @@ new Chart(categoryCtx, {
                 },
                 {
                     label: 'Chi tiêu',
-                    data: [5200000, 4800000, 5300000, 5000000, 4600000, 4500000],
+                    data: trendData.expenseData,
                     borderColor: '#ef4444',
                     backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     fill: true,
@@ -628,19 +621,21 @@ new Chart(categoryCtx, {
     
     // Comparison Chart
     const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
-    new Chart(comparisonCtx, {
+    const comparisonData = calculateComparison();
+    
+    comparisonChart = new Chart(comparisonCtx, {
         type: 'bar',
         data: {
-            labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'],
+            labels: comparisonData.months,
             datasets: [
                 {
                     label: 'Thu nhập',
-                    data: [20000000, 20000000, 20000000, 20000000, 20000000, 20000000],
+                    data: comparisonData.incomeData,
                     backgroundColor: '#10b981'
                 },
                 {
                     label: 'Chi tiêu',
-                    data: [4500000, 5000000, 4800000, 5200000, 4900000, 4600000],
+                    data: comparisonData.expenseData,
                     backgroundColor: '#ef4444'
                 }
             ]
@@ -665,6 +660,36 @@ new Chart(categoryCtx, {
             }
         }
     });
+}
+
+// ==================== HÀM CẬP NHẬT BIỀU ĐỒ ====================
+
+function updateAllCharts() {
+    // Cập nhật biểu đồ danh mục
+    if (categoryChart) {
+        const categoryData = calculateExpenseByCategory();
+        categoryChart.data.labels = categoryData.labels;
+        categoryChart.data.datasets[0].data = categoryData.data;
+        categoryChart.update();
+    }
+    
+    // Cập nhật biểu đồ xu hướng
+    if (trendChart) {
+        const trendData = calculateSixMonthTrend();
+        trendChart.data.labels = trendData.months;
+        trendChart.data.datasets[0].data = trendData.incomeData;
+        trendChart.data.datasets[1].data = trendData.expenseData;
+        trendChart.update();
+    }
+    
+    // Cập nhật biểu đồ so sánh
+    if (comparisonChart) {
+        const comparisonData = calculateComparison();
+        comparisonChart.data.labels = comparisonData.months;
+        comparisonChart.data.datasets[0].data = comparisonData.incomeData;
+        comparisonChart.data.datasets[1].data = comparisonData.expenseData;
+        comparisonChart.update();
+    }
 }
 
 // Utility functions
@@ -850,6 +875,7 @@ function updateTransaction() {
     saveTransactions();
     renderTransactions();
     updateDashboardStats();
+    updateAllCharts();
     closeModal('edit-transaction-modal');
     
     showNotification('Đã cập nhật giao dịch!');
@@ -1020,4 +1046,90 @@ function highlightText(text, searchTerm) {
                text.slice(index + searchTerm.length);
     }
     return text;
+}
+
+// ==================== CHART DATA CALCULATIONS ====================
+
+// Tính toán chi tiêu theo danh mục
+function calculateExpenseByCategory() {
+    const currentMonth = getCurrentMonth();
+    const categoryExpenses = {};
+    
+    // Lọc giao dịch chi tiêu trong tháng hiện tại
+    const monthlyExpenses = transactions.filter(t => 
+        t.type === 'expense' && t.date.startsWith(currentMonth)
+    );
+    
+    // Tính tổng chi tiêu theo từng danh mục
+    monthlyExpenses.forEach(t => {
+        if (categoryExpenses[t.categoryName]) {
+            categoryExpenses[t.categoryName] += t.amount;
+        } else {
+            categoryExpenses[t.categoryName] = t.amount;
+        }
+    });
+    
+    // Chuyển thành mảng để dùng cho biểu đồ
+    return {
+        labels: Object.keys(categoryExpenses),
+        data: Object.values(categoryExpenses)
+    };
+}
+
+// Tính toán xu hướng 6 tháng
+function calculateSixMonthTrend() {
+    const months = [];
+    const incomeData = [];
+    const expenseData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const monthLabel = `T${date.getMonth() + 1}`;
+        
+        months.push(monthLabel);
+        
+        // Tính thu nhập tháng đó
+        const monthlyIncome = transactions
+            .filter(t => t.type === 'income' && t.date.startsWith(monthStr))
+            .reduce((sum, t) => sum + t.amount, 0);
+        incomeData.push(monthlyIncome);
+        
+        // Tính chi tiêu tháng đó
+        const monthlyExpense = transactions
+            .filter(t => t.type === 'expense' && t.date.startsWith(monthStr))
+            .reduce((sum, t) => sum + t.amount, 0);
+        expenseData.push(monthlyExpense);
+    }
+    
+    return { months, incomeData, expenseData };
+}
+
+// Tính toán so sánh thu nhập và chi tiêu
+function calculateComparison() {
+    const months = [];
+    const incomeData = [];
+    const expenseData = [];
+    
+    for (let i = 5; i >= 0; i--) {
+        const date = new Date();
+        date.setMonth(date.getMonth() - i);
+        const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        const monthLabel = `T${date.getMonth() + 1}`;
+        
+        months.push(monthLabel);
+        
+        const monthlyIncome = transactions
+            .filter(t => t.type === 'income' && t.date.startsWith(monthStr))
+            .reduce((sum, t) => sum + t.amount, 0);
+        incomeData.push(monthlyIncome);
+        
+        const monthlyExpense = transactions
+            .filter(t => t.type === 'expense' && t.date.startsWith(monthStr))
+            .reduce((sum, t) => sum + t.amount, 0);
+        expenseData.push(monthlyExpense);
+    }
+    
+    return { months, incomeData, expenseData };
 }
