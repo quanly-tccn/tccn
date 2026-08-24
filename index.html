@@ -167,8 +167,7 @@
                     </div>
                 </div>
                 
-                <!-- Transactions Page -->
-                <div class="page" id="transactions-page">
+              <div class="page" id="transactions-page">
     <div class="filters-bar">
         <div class="search-box">
             <i class="fas fa-search"></i>
@@ -197,6 +196,15 @@
             <option value="other">📦 Khác</option>
         </select>
         <input type="date" class="date-filter" id="filter-date" onchange="filterTransactions()">
+        
+        <!-- Sắp xếp -->
+        <select class="filter-select" id="sort-by" onchange="filterTransactions()">
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+            <option value="amount-desc">Số tiền cao nhất</option>
+            <option value="amount-asc">Số tiền thấp nhất</option>
+        </select>
+
         <button class="clear-filter-btn" onclick="clearFilters()">
             <i class="fas fa-times"></i> Xóa lọc
         </button>

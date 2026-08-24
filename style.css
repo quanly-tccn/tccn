@@ -1358,3 +1358,43 @@ canvas {
         width: 100%;
     }
 }
+
+/* Price range inputs */
+.price-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.price-range input {
+    padding: 12px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 100%;
+    min-height: 42px;
+    transition: var(--transition);
+}
+
+.price-range input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.price-range span {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+    .price-range {
+        width: 100%;
+    }
+    
+    .price-range input {
+        min-height: 40px;
+    }
+}

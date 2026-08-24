@@ -845,24 +845,64 @@ function updateTransaction() {
     showNotification('Đã cập nhật giao dịch!');
 }
 
-// ==================== FILTER & SEARCH ====================
+/// Hàm chuẩn hóa chuỗi - bỏ dấu tiếng Việt
+function normalizeString(str) {
+    return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')  // Bỏ dấu
+        .replace(/đ/g, 'd')                // Chuyển đ -> d
+        .replace(/Đ/g, 'd');
+}
 
-// Hàm lọc và tìm kiếm giao dịch
+// Hàm kiểm tra chuỗi có chứa từ khóa (không phân biệt dấu)
+function containsSearchTerm(text, searchTerm) {
+    const normalizedText = normalizeString(text);
+    const normalizedSearch = normalizeString(searchTerm);
+    return normalizedText.includes(normalizedSearch);
+}
+
+// Hàm kiểm tra chuỗi bắt đầu bằng từ khóa
+function startsWithSearchTerm(text, searchTerm) {
+    const normalizedText = normalizeString(text);
+    const normalizedSearch = normalizeString(searchTerm);
+    return normalizedText.startsWith(normalizedSearch);
+}
+
 function filterTransactions() {
-    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+    const searchTerm = document.getElementById('search-input').value.trim();
     const filterType = document.getElementById('filter-type').value;
     const filterCategory = document.getElementById('filter-category').value;
     const filterDate = document.getElementById('filter-date').value;
     
     let filteredTransactions = [...transactions];
     
-    // Lọc theo từ khóa tìm kiếm
+    // Lọc theo từ khóa tìm kiếm (không phân biệt dấu)
     if (searchTerm) {
-        filteredTransactions = filteredTransactions.filter(t => 
-            t.note.toLowerCase().includes(searchTerm) ||
-            t.categoryName.toLowerCase().includes(searchTerm) ||
-            t.amount.toString().includes(searchTerm)
-        );
+        filteredTransactions = filteredTransactions.filter(t => {
+            // Kiểm tra trong ghi chú
+            if (containsSearchTerm(t.note, searchTerm)) return true;
+            
+            // Kiểm tra trong danh mục
+            if (containsSearchTerm(t.categoryName, searchTerm)) return true;
+            
+            // Kiểm tra trong số tiền
+            if (t.amount.toString().includes(searchTerm.replace(/\./g, ''))) return true;
+            
+            return false;
+        });
+        
+        // Ưu tiên kết quả bắt đầu bằng từ khóa
+        filteredTransactions.sort((a, b) => {
+            const aStartsWith = startsWithSearchTerm(a.categoryName, searchTerm) || 
+                               startsWithSearchTerm(a.note, searchTerm);
+            const bStartsWith = startsWithSearchTerm(b.categoryName, searchTerm) || 
+                               startsWithSearchTerm(b.note, searchTerm);
+            
+            if (aStartsWith && !bStartsWith) return -1;
+            if (!aStartsWith && bStartsWith) return 1;
+            return 0;
+        });
     }
     
     // Lọc theo loại (thu/chi)
@@ -880,6 +920,23 @@ function filterTransactions() {
         filteredTransactions = filteredTransactions.filter(t => t.date === filterDate);
     }
     
+    // Sắp xếp
+    const sortBy = document.getElementById('sort-by').value;
+    switch(sortBy) {
+        case 'newest':
+            filteredTransactions.sort((a, b) => b.date.localeCompare(a.date));
+            break;
+        case 'oldest':
+            filteredTransactions.sort((a, b) => a.date.localeCompare(b.date));
+            break;
+        case 'amount-desc':
+            filteredTransactions.sort((a, b) => b.amount - a.amount);
+            break;
+        case 'amount-asc':
+            filteredTransactions.sort((a, b) => a.amount - b.amount);
+            break;
+    }
+    
     // Hiển thị kết quả
     const container = document.getElementById('all-transactions');
     container.innerHTML = renderTransactionList(filteredTransactions);
@@ -889,8 +946,21 @@ function filterTransactions() {
     resultCount.className = 'result-count';
     resultCount.innerHTML = `<p>Tìm thấy <strong>${filteredTransactions.length}</strong> giao dịch</p>`;
     
-    // Thêm vào đầu container
     container.insertBefore(resultCount, container.firstChild);
+}
+
+// Hàm format số tiền cho ô khoảng giá
+function handlePriceInput(input) {
+    // Lấy giá trị hiện tại, loại bỏ tất cả trừ số
+    let value = input.value.replace(/[^0-9]/g, '');
+    
+    // Format nếu có giá trị
+    if (value) {
+        const formatted = parseInt(value, 10).toLocaleString('vi-VN');
+        input.value = formatted;
+    } else {
+        input.value = '';
+    }
 }
 
 // Hàm xóa tất cả bộ lọc
@@ -899,6 +969,7 @@ function clearFilters() {
     document.getElementById('filter-type').value = 'all';
     document.getElementById('filter-category').value = 'all';
     document.getElementById('filter-date').value = '';
+    document.getElementById('sort-by').value = 'newest';
     
     filterTransactions();
 }
