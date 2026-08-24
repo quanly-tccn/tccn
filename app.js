@@ -130,8 +130,33 @@ function getAmountValue() {
     return parseInt(amountInput.value.replace(/\./g, '')) || 0;
 }
 
-// State management
-let transactions = [...sampleTransactions];
+// ==================== STATE MANAGEMENT ====================
+const STORAGE_KEY = 'expense_tracker_transactions';
+
+// Hàm lấy dữ liệu từ LocalStorage
+function loadTransactions() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (error) {
+        console.error('Lỗi khi đọc LocalStorage:', error);
+    }
+    return [...sampleTransactions]; // Dùng dữ liệu mẫu nếu chưa có
+}
+
+// Hàm lưu dữ liệu vào LocalStorage
+function saveTransactions() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    } catch (error) {
+        console.error('Lỗi khi lưu LocalStorage:', error);
+    }
+}
+
+// Khởi tạo state
+let transactions = loadTransactions();
 let currentPage = 'dashboard';
 let selectedType = 'expense';
 
@@ -142,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTransactions();
     setDefaultDate();
     updateCategorySelect('expense');  // ← Thêm dòng này để khởi tạo danh mục mặc định
+    setupAmountInput();
+    updateDashboardStats(); // Cập nhật số liệu thống kê
     // Thêm event listener cho input số tiền
     const amountInput = document.getElementById('amount-input');
     if (amountInput) {
@@ -272,7 +299,9 @@ function saveTransaction() {
     };
     
     transactions.unshift(newTransaction);
+    saveTransactions(); // Lưu vào LocalStorage
     renderTransactions();
+    updateDashboardStats(); // Cập nhật số liệu mới
     closeModal('transaction-modal');
     
     // Reset form
@@ -325,6 +354,81 @@ function getAmountValue() {
     const amountInput = document.getElementById('amount-input');
     return parseFloat(amountInput.value.replace(/[^0-9]/g, '')) || 0;
 }
+
+// ==================== CALCULATIONS ====================
+// Lấy tháng hiện tại (định dạng YYYY-MM)
+function getCurrentMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Tính tổng thu nhập tháng hiện tại
+function calculateMonthlyIncome() {
+    const currentMonth = getCurrentMonth();
+    
+    return transactions
+        .filter(t => t.type === 'income' && t.date.startsWith(currentMonth))
+        .reduce((sum, t) => sum + t.amount, 0);
+}
+
+// Tính tổng chi tiêu tháng hiện tại
+function calculateMonthlyExpense() {
+    const currentMonth = getCurrentMonth();
+    
+    return transactions
+        .filter(t => t.type === 'expense' && t.date.startsWith(currentMonth))
+        .reduce((sum, t) => sum + t.amount, 0);
+}
+
+// Tính số dư hiện tại
+function calculateBalance() {
+    const totalIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    return totalIncome - totalExpense;
+}
+
+// Tính tổng tiết kiệm (ví dụ: 20% thu nhập)
+function calculateSavings() {
+    const monthlyIncome = calculateMonthlyIncome();
+    return Math.round(monthlyIncome * 0.2); // Giả định tiết kiệm 20% thu nhập
+}
+
+// Cập nhật tất cả số liệu trên dashboard
+function updateDashboardStats() {
+    // Cập nhật số dư
+    const balance = calculateBalance();
+    document.querySelector('.balance-card .card-value').textContent = formatCurrency(balance);
+    
+    // Cập nhật thu nhập tháng
+    const monthlyIncome = calculateMonthlyIncome();
+    document.querySelector('.income-card .card-value').textContent = formatCurrency(monthlyIncome);
+    
+    // Cập nhật chi tiêu tháng
+    const monthlyExpense = calculateMonthlyExpense();
+    document.querySelector('.expense-card .card-value').textContent = formatCurrency(monthlyExpense);
+    
+    // Cập nhật tiết kiệm
+    const savings = calculateSavings();
+    document.querySelector('.savings-card .card-value').textContent = formatCurrency(savings);
+    
+    // Cập nhật số lượng giao dịch
+    const incomeCount = transactions.filter(t => 
+        t.type === 'income' && t.date.startsWith(getCurrentMonth())
+    ).length;
+    document.querySelector('.income-card .card-change').textContent = `${incomeCount} giao dịch`;
+    
+    const expenseCount = transactions.filter(t => 
+        t.type === 'expense' && t.date.startsWith(getCurrentMonth())
+    ).length;
+    document.querySelector('.expense-card .card-change').textContent = `${expenseCount} giao dịch`;
+}
+
 function renderTransactions() {
     const recentContainer = document.getElementById('recent-transactions');
     const allContainer = document.getElementById('all-transactions');
@@ -374,7 +478,9 @@ function editTransaction(id) {
 function deleteTransaction(id) {
     if (confirm('Bạn có chắc muốn xóa giao dịch này?')) {
         transactions = transactions.filter(t => t.id !== id);
+        saveTransactions(); // Lưu vào LocalStorage
         renderTransactions();
+        updateDashboardStats(); // Cập nhật số liệu mới
         showNotification('Đã xóa giao dịch!');
     }
 }
