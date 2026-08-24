@@ -169,11 +169,26 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCategorySelect('expense');  // ← Thêm dòng này để khởi tạo danh mục mặc định
     setupAmountInput();
     updateDashboardStats(); // Cập nhật số liệu thống kê
+
     // Thêm event listener cho input số tiền
     const amountInput = document.getElementById('amount-input');
     if (amountInput) {
         amountInput.addEventListener('input', handleAmountInput);
     }
+    // Event delegation cho các nút action
+    document.addEventListener('click', function(e) {
+        // Tìm nút edit được click
+        if (e.target.closest('.edit-btn')) {
+            const id = parseInt(e.target.closest('.edit-btn').dataset.id);
+            editTransaction(id);
+        }
+        
+        // Tìm nút delete được click
+        if (e.target.closest('.delete-btn')) {
+            const id = parseInt(e.target.closest('.delete-btn').dataset.id);
+            deleteTransaction(id);
+        }
+    });
 });
 
 // Navigation
@@ -445,7 +460,7 @@ function renderTransactionList(transactionList) {
     }
     
     return transactionList.map(transaction => `
-        <div class="transaction-item">
+        <div class="transaction-item" data-id="${transaction.id}">
             <div class="transaction-info">
                 <div class="transaction-icon">${transaction.icon}</div>
                 <div class="transaction-details">
@@ -457,10 +472,10 @@ function renderTransactionList(transactionList) {
                 ${transaction.type === 'income' ? '+' : '-'}${formatCurrency(transaction.amount)}
             </div>
             <div class="transaction-actions">
-                <button class="action-btn" onclick="editTransaction(${transaction.id})">
+                <button class="action-btn edit-btn" data-id="${transaction.id}">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button class="action-btn" onclick="deleteTransaction(${transaction.id})">
+                <button class="action-btn delete-btn" data-id="${transaction.id}">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -469,10 +484,7 @@ function renderTransactionList(transactionList) {
 }
 
 function editTransaction(id) {
-    const transaction = transactions.find(t => t.id === id);
-    if (transaction) {
-        alert(`Chỉnh sửa giao dịch: ${transaction.note}\n(Sẽ được phát triển trong phiên bản sau)`);
-    }
+    openEditModal(id);
 }
 
 function deleteTransaction(id) {
@@ -713,3 +725,114 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+// ==================== EDIT TRANSACTION ====================
+let editingTransactionId = null;
+let editSelectedType = 'expense';
+
+// Hàm mở modal chỉnh sửa
+function openEditModal(id) {
+    // Tìm giao dịch
+    const transaction = transactions.find(t => t.id === id);
+    if (!transaction) {
+        console.error('Không tìm thấy giao dịch:', id);
+        return;
+    }
+    
+    // Lưu ID đang chỉnh sửa
+    editingTransactionId = id;
+    editSelectedType = transaction.type;
+    
+    // Cập nhật type buttons
+    document.querySelectorAll('#edit-transaction-modal .type-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.type === transaction.type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Điền dữ liệu vào form
+    const amountInput = document.getElementById('edit-amount-input');
+    const noteInput = document.getElementById('edit-note-input');
+    const dateInput = document.getElementById('edit-date-input');
+    
+    if (amountInput) amountInput.value = transaction.amount.toLocaleString('vi-VN');
+    if (noteInput) noteInput.value = transaction.note || '';
+    if (dateInput) dateInput.value = transaction.date;
+    
+    // Cập nhật danh mục
+    updateEditCategorySelect(transaction.type);
+    
+    const categorySelect = document.getElementById('edit-category-select');
+    if (categorySelect) categorySelect.value = transaction.category;
+    
+    // Mở modal
+    openModal('edit-transaction-modal');
+}
+
+// Hàm chọn loại giao dịch khi chỉnh sửa
+function selectEditType(type) {
+    editSelectedType = type;
+    
+    document.querySelectorAll('#edit-transaction-modal .type-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.type === type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    updateEditCategorySelect(type);
+}
+
+// Hàm cập nhật danh mục khi chỉnh sửa
+function updateEditCategorySelect(type) {
+    const categorySelect = document.getElementById('edit-category-select');
+    if (!categorySelect) {
+        console.error('Không tìm thấy edit-category-select');
+        return;
+    }
+    
+    const categoriesList = categories[type] || categories.expense;
+    categorySelect.innerHTML = categoriesList.map(cat => 
+        `<option value="${cat.value}">${cat.label}</option>`
+    ).join('');
+}
+
+// Hàm cập nhật giao dịch
+function updateTransaction() {
+    const amountInput = document.getElementById('edit-amount-input');
+    const amount = parseInt(amountInput.value.replace(/[^0-9]/g, '')) || 0;
+    const category = document.getElementById('edit-category-select').value;
+    const note = document.getElementById('edit-note-input').value;
+    const date = document.getElementById('edit-date-input').value;
+    
+    if (!amount || !date) {
+        alert('Vui lòng nhập đầy đủ thông tin!');
+        return;
+    }
+    
+    const categoriesList = categories[editSelectedType] || categories.expense;
+    const selectedCategory = categoriesList.find(cat => cat.value === category);
+    
+    transactions = transactions.map(t => {
+        if (t.id === editingTransactionId) {
+            return {
+                ...t,
+                type: editSelectedType,
+                category: category,
+                categoryName: selectedCategory ? selectedCategory.label.split(' ').slice(1).join(' ') : 'Khác',
+                icon: selectedCategory ? selectedCategory.label.split(' ')[0] : '📦',
+                amount: amount,
+                note: note || 'Không có ghi chú',
+                date: date
+            };
+        }
+        return t;
+    });
+    
+    saveTransactions();
+    renderTransactions();
+    updateDashboardStats();
+    closeModal('edit-transaction-modal');
+    
+    showNotification('Đã cập nhật giao dịch!');
+}

@@ -431,6 +431,7 @@
                 </button>
             </div>
             
+            
             <div class="modal-body">
                 <div class="type-selector">
                     <button class="type-btn active" data-type="expense" onclick="selectType('expense')">
@@ -471,6 +472,59 @@
         </div>
     </div>
     
+    <!-- Edit Transaction Modal -->
+<div class="modal" id="edit-transaction-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Chỉnh sửa giao dịch</h3>
+            <button class="close-modal" onclick="closeModal('edit-transaction-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="type-selector">
+                <button class="type-btn" data-type="expense" onclick="selectEditType('expense')">
+                    Chi tiêu
+                </button>
+                <button class="type-btn" data-type="income" onclick="selectEditType('income')">
+                    Thu nhập
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label>Số tiền</label>
+                <input type="text" class="form-input" placeholder="0 đ" id="edit-amount-input" inputmode="numeric">
+            </div>
+            
+            <div class="form-group">
+                <label>Danh mục</label>
+                <select class="form-input" id="edit-category-select">
+                    <option value="">Chọn danh mục</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Ghi chú</label>
+                <textarea class="form-input" rows="3" placeholder="Thêm ghi chú..." id="edit-note-input"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Ngày giao dịch</label>
+                <input type="date" class="form-input" id="edit-date-input">
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal('edit-transaction-modal')">Hủy</button>
+            <button class="save-btn" onclick="updateTransaction()">Cập nhật</button>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
     <script src="app.js"></script>
 </body>
 </html>
