@@ -452,6 +452,14 @@ function renderTransactions() {
     
     recentContainer.innerHTML = renderTransactionList(recentTransactions);
     allContainer.innerHTML = renderTransactionList(transactions);
+    
+    // Reset filters khi render lại
+    if (document.getElementById('search-input')) {
+        document.getElementById('search-input').value = '';
+        document.getElementById('filter-type').value = 'all';
+        document.getElementById('filter-category').value = 'all';
+        document.getElementById('filter-date').value = '';
+    }
 }
 
 function renderTransactionList(transactionList) {
@@ -835,4 +843,62 @@ function updateTransaction() {
     closeModal('edit-transaction-modal');
     
     showNotification('Đã cập nhật giao dịch!');
+}
+
+// ==================== FILTER & SEARCH ====================
+
+// Hàm lọc và tìm kiếm giao dịch
+function filterTransactions() {
+    const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+    const filterType = document.getElementById('filter-type').value;
+    const filterCategory = document.getElementById('filter-category').value;
+    const filterDate = document.getElementById('filter-date').value;
+    
+    let filteredTransactions = [...transactions];
+    
+    // Lọc theo từ khóa tìm kiếm
+    if (searchTerm) {
+        filteredTransactions = filteredTransactions.filter(t => 
+            t.note.toLowerCase().includes(searchTerm) ||
+            t.categoryName.toLowerCase().includes(searchTerm) ||
+            t.amount.toString().includes(searchTerm)
+        );
+    }
+    
+    // Lọc theo loại (thu/chi)
+    if (filterType !== 'all') {
+        filteredTransactions = filteredTransactions.filter(t => t.type === filterType);
+    }
+    
+    // Lọc theo danh mục
+    if (filterCategory !== 'all') {
+        filteredTransactions = filteredTransactions.filter(t => t.category === filterCategory);
+    }
+    
+    // Lọc theo ngày
+    if (filterDate) {
+        filteredTransactions = filteredTransactions.filter(t => t.date === filterDate);
+    }
+    
+    // Hiển thị kết quả
+    const container = document.getElementById('all-transactions');
+    container.innerHTML = renderTransactionList(filteredTransactions);
+    
+    // Hiển thị số lượng kết quả
+    const resultCount = document.createElement('div');
+    resultCount.className = 'result-count';
+    resultCount.innerHTML = `<p>Tìm thấy <strong>${filteredTransactions.length}</strong> giao dịch</p>`;
+    
+    // Thêm vào đầu container
+    container.insertBefore(resultCount, container.firstChild);
+}
+
+// Hàm xóa tất cả bộ lọc
+function clearFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('filter-type').value = 'all';
+    document.getElementById('filter-category').value = 'all';
+    document.getElementById('filter-date').value = '';
+    
+    filterTransactions();
 }

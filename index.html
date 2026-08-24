@@ -169,31 +169,43 @@
                 
                 <!-- Transactions Page -->
                 <div class="page" id="transactions-page">
-                    <div class="filters-bar">
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" placeholder="Tìm kiếm giao dịch...">
-                        </div>
-                        <select class="filter-select">
-                            <option value="all">Tất cả loại</option>
-                            <option value="income">Thu nhập</option>
-                            <option value="expense">Chi tiêu</option>
-                        </select>
-                        <select class="filter-select">
-                            <option value="all">Tất cả danh mục</option>
-                            <option value="food">Ăn uống</option>
-                            <option value="transport">Di chuyển</option>
-                            <option value="shopping">Mua sắm</option>
-                            <option value="bills">Hóa đơn</option>
-                            <option value="entertainment">Giải trí</option>
-                        </select>
-                        <input type="date" class="date-filter">
-                    </div>
-                    
-                    <div class="transaction-list full-list" id="all-transactions">
-                        <!-- All transactions rendered here -->
-                    </div>
-                </div>
+    <div class="filters-bar">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Tìm kiếm giao dịch..." id="search-input" oninput="filterTransactions()">
+        </div>
+        <select class="filter-select" id="filter-type" onchange="filterTransactions()">
+            <option value="all">Tất cả loại</option>
+            <option value="income">Thu nhập</option>
+            <option value="expense">Chi tiêu</option>
+        </select>
+        <select class="filter-select" id="filter-category" onchange="filterTransactions()">
+            <option value="all">Tất cả danh mục</option>
+            <option value="food">🍜 Ăn uống</option>
+            <option value="transport">🚗 Di chuyển</option>
+            <option value="shopping">🛍️ Mua sắm</option>
+            <option value="bills">📄 Hóa đơn</option>
+            <option value="entertainment">🎮 Giải trí</option>
+            <option value="health">💊 Y tế</option>
+            <option value="education">📚 Giáo dục</option>
+            <option value="salary">💰 Lương</option>
+            <option value="bonus">🎁 Thưởng</option>
+            <option value="investment">📈 Đầu tư</option>
+            <option value="freelance">💻 Freelance</option>
+            <option value="business">🏪 Kinh doanh</option>
+            <option value="gift">🎀 Quà tặng</option>
+            <option value="other">📦 Khác</option>
+        </select>
+        <input type="date" class="date-filter" id="filter-date" onchange="filterTransactions()">
+        <button class="clear-filter-btn" onclick="clearFilters()">
+            <i class="fas fa-times"></i> Xóa lọc
+        </button>
+    </div>
+    
+    <div class="transaction-list full-list" id="all-transactions">
+        <!-- All transactions rendered here -->
+    </div>
+</div>
                 
                 <!-- Budget Page -->
                 <div class="page" id="budget-page">

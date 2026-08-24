@@ -1305,3 +1305,56 @@ canvas {
         font-size: 16px !important;
     }
 }
+
+/* Result count */
+.result-count {
+    padding: 10px 15px;
+    background: #f0f9ff;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #2c5282;
+}
+
+.result-count strong {
+    font-weight: 700;
+    color: #1a365d;
+}
+
+/* Clear filter button */
+.clear-filter-btn {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.clear-filter-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+    
+    .filter-select,
+    .date-filter,
+    .clear-filter-btn {
+        width: 100%;
+    }
+}
