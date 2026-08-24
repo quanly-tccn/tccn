@@ -467,13 +467,22 @@ function renderTransactionList(transactionList) {
         return '<p class="text-center text-secondary">Không có giao dịch nào</p>';
     }
     
-    return transactionList.map(transaction => `
+    // Lấy từ khóa tìm kiếm hiện tại
+    const searchInput = document.getElementById('search-input');
+    const searchTerm = searchInput ? searchInput.value.trim() : '';
+    
+    return transactionList.map(transaction => {
+        // Highlight tên danh mục và ghi chú
+        const categoryName = highlightText(transaction.categoryName, searchTerm);
+        const note = highlightText(transaction.note, searchTerm);
+        
+        return `
         <div class="transaction-item" data-id="${transaction.id}">
             <div class="transaction-info">
                 <div class="transaction-icon">${transaction.icon}</div>
                 <div class="transaction-details">
-                    <p class="transaction-name">${transaction.categoryName}</p>
-                    <p class="transaction-date">${formatDate(transaction.date)} - ${transaction.note}</p>
+                    <p class="transaction-name">${categoryName}</p>
+                    <p class="transaction-date">${formatDate(transaction.date)} - ${note}</p>
                 </div>
             </div>
             <div class="transaction-amount ${transaction.type}">
@@ -488,7 +497,8 @@ function renderTransactionList(transactionList) {
                 </button>
             </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function editTransaction(id) {
@@ -869,6 +879,24 @@ function startsWithSearchTerm(text, searchTerm) {
     return normalizedText.startsWith(normalizedSearch);
 }
 
+// Hàm highlight từ khóa tìm kiếm
+function highlightText(text, searchTerm) {
+    if (!searchTerm || !text) return text;
+    
+    const normalizedText = normalizeString(text);
+    const normalizedSearch = normalizeString(searchTerm);
+    
+    if (normalizedText.includes(normalizedSearch)) {
+        const index = normalizedText.indexOf(normalizedSearch);
+        return text.slice(0, index) + 
+               '<strong class="highlight">' + 
+               text.slice(index, index + searchTerm.length) + 
+               '</strong>' + 
+               text.slice(index + searchTerm.length);
+    }
+    return text;
+}
+
 function filterTransactions() {
     const searchTerm = document.getElementById('search-input').value.trim();
     const filterType = document.getElementById('filter-type').value;
@@ -947,7 +975,9 @@ function filterTransactions() {
     resultCount.innerHTML = `<p>Tìm thấy <strong>${filteredTransactions.length}</strong> giao dịch</p>`;
     
     container.insertBefore(resultCount, container.firstChild);
+    
 }
+
 
 // Hàm format số tiền cho ô khoảng giá
 function handlePriceInput(input) {
@@ -972,4 +1002,22 @@ function clearFilters() {
     document.getElementById('sort-by').value = 'newest';
     
     filterTransactions();
+}
+
+// ==================== HIGHLIGHT SEARCH ====================
+function highlightText(text, searchTerm) {
+    if (!searchTerm || !text) return text;
+    
+    const normalizedText = normalizeString(text);
+    const normalizedSearch = normalizeString(searchTerm);
+    
+    if (normalizedText.includes(normalizedSearch)) {
+        const index = normalizedText.indexOf(normalizedSearch);
+        return text.slice(0, index) + 
+               '<strong class="highlight">' + 
+               text.slice(index, index + searchTerm.length) + 
+               '</strong>' + 
+               text.slice(index + searchTerm.length);
+    }
+    return text;
 }
