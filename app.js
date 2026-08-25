@@ -83,6 +83,14 @@ const sampleTransactions = [
     }
 ];
 
+function getCurrentDate() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // Hàm format số với dấu phân cách
 function formatNumberInput(value) {
     // Loại bỏ tất cả ký tự không phải số
@@ -563,7 +571,7 @@ function initCharts() {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return value / 1000000 + 'tr';
+                            return formatChartValue(value);
                         }
                     }
                 }
@@ -611,7 +619,7 @@ function initCharts() {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return value / 1000000 + 'tr';
+                             return formatChartValue(value);
                         }
                     }
                 }
@@ -653,7 +661,7 @@ function initCharts() {
                     beginAtZero: true,
                     ticks: {
                         callback: function(value) {
-                            return value / 1000000 + 'tr';
+                            return formatChartValue(value);
                         }
                     }
                 }
@@ -689,6 +697,18 @@ function updateAllCharts() {
         comparisonChart.data.datasets[0].data = comparisonData.incomeData;
         comparisonChart.data.datasets[1].data = comparisonData.expenseData;
         comparisonChart.update();
+    }
+}
+
+// ==================== CHART VALUE FORMAT ====================
+function formatChartValue(value) {
+    if (value === 0) return '0';
+    if (value >= 1000000) {
+        return (value / 1000000).toFixed(1) + 'tr';
+    } else if (value >= 1000) {
+        return (value / 1000).toFixed(0) + 'k';
+    } else {
+        return value.toString();
     }
 }
 
@@ -1052,16 +1072,12 @@ function highlightText(text, searchTerm) {
 
 // Tính toán chi tiêu theo danh mục
 function calculateExpenseByCategory() {
-    const currentMonth = getCurrentMonth();
     const categoryExpenses = {};
     
-    // Lọc giao dịch chi tiêu trong tháng hiện tại
-    const monthlyExpenses = transactions.filter(t => 
-        t.type === 'expense' && t.date.startsWith(currentMonth)
-    );
+    // Lấy tất cả chi tiêu
+    const allExpenses = transactions.filter(t => t.type === 'expense');
     
-    // Tính tổng chi tiêu theo từng danh mục
-    monthlyExpenses.forEach(t => {
+    allExpenses.forEach(t => {
         if (categoryExpenses[t.categoryName]) {
             categoryExpenses[t.categoryName] += t.amount;
         } else {
@@ -1069,10 +1085,16 @@ function calculateExpenseByCategory() {
         }
     });
     
-    // Chuyển thành mảng để dùng cho biểu đồ
+    // Chuyển thành mảng các cặp [label, data]
+    const entries = Object.entries(categoryExpenses);
+    
+    // Sắp xếp tăng dần theo giá trị
+    entries.sort((a, b) => a[1] - b[1]);
+    
+    // Tách thành labels và data
     return {
-        labels: Object.keys(categoryExpenses),
-        data: Object.values(categoryExpenses)
+        labels: entries.map(entry => entry[0]),
+        data: entries.map(entry => entry[1])
     };
 }
 
@@ -1082,25 +1104,31 @@ function calculateSixMonthTrend() {
     const incomeData = [];
     const expenseData = [];
     
+    // Lấy tất cả dữ liệu (không lọc theo tháng)
+    const allIncome = transactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const allExpense = transactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    // Tạo dữ liệu cho 6 tháng (tạm thời dùng dữ liệu tổng)
     for (let i = 5; i >= 0; i--) {
         const date = new Date();
         date.setMonth(date.getMonth() - i);
-        const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         const monthLabel = `T${date.getMonth() + 1}`;
         
         months.push(monthLabel);
         
-        // Tính thu nhập tháng đó
-        const monthlyIncome = transactions
-            .filter(t => t.type === 'income' && t.date.startsWith(monthStr))
-            .reduce((sum, t) => sum + t.amount, 0);
-        incomeData.push(monthlyIncome);
-        
-        // Tính chi tiêu tháng đó
-        const monthlyExpense = transactions
-            .filter(t => t.type === 'expense' && t.date.startsWith(monthStr))
-            .reduce((sum, t) => sum + t.amount, 0);
-        expenseData.push(monthlyExpense);
+        // Nếu là tháng hiện tại thì dùng dữ liệu thực, còn lại là 0
+        if (i === 0) {
+            incomeData.push(allIncome);
+            expenseData.push(allExpense);
+        } else {
+            incomeData.push(0);
+            expenseData.push(0);
+        }
     }
     
     return { months, incomeData, expenseData };
