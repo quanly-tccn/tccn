@@ -65,7 +65,7 @@
                     <div class="avatar">BP</div>
                     <div>
                         <p class="user-name">Bình Phùng</p>
-                        <p class="user-email">binhpv.4078@gemail.com</p>
+                        <p class="user-email">binhpv.4078@gmail.com</p>
                     </div>
                 </div>
             </div>
@@ -219,63 +219,26 @@
                 
                 <!-- Budget Page -->
                 <div class="page" id="budget-page">
-                    <div class="budget-overview">
-                        <h3>Ngân sách tháng này</h3>
-                        <div class="budget-total">
-                            <p>Tổng ngân sách: <strong>0đ</strong></p>
-                            <p>Đã chi tiêu: <strong>0đ</strong></p>
-                            <p>Còn lại: <strong class="text-success">0đ</strong></p>
-                        </div>
-                    </div>
-                    
-                    <div class="budget-categories">
-                        <div class="budget-item">
-                            <div class="budget-info">
-                                <span class="category-icon">🍜</span>
-                                <div>
-                                    <p class="budget-name">Ăn uống</p>
-                                    <p class="budget-amount">3,000,000đ / 5,000,000đ</p>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 60%"></div>
-                            </div>
-                            <p class="budget-percentage">60%</p>
-                        </div>
-                        
-                        <div class="budget-item">
-                            <div class="budget-info">
-                                <span class="category-icon">🚗</span>
-                                <div>
-                                    <p class="budget-name">Di chuyển</p>
-                                    <p class="budget-amount">500,000đ / 1,000,000đ</p>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress warning" style="width: 50%"></div>
-                            </div>
-                            <p class="budget-percentage">50%</p>
-                        </div>
-                        
-                        <div class="budget-item">
-                            <div class="budget-info">
-                                <span class="category-icon">🛍️</span>
-                                <div>
-                                    <p class="budget-name">Mua sắm</p>
-                                    <p class="budget-amount">800,000đ / 2,000,000đ</p>
-                                </div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress danger" style="width: 40%"></div>
-                            </div>
-                            <p class="budget-percentage">40%</p>
-                        </div>
-                        
-                        <button class="add-budget-btn" onclick="alert('Chức năng đang phát triển')">
-                            <i class="fas fa-plus"></i> Thêm ngân sách mới
-                        </button>
-                    </div>
-                </div>
+            <div class="budget-overview">
+    <div class="budget-header">
+        <h3>Ngân sách tháng <span id="budget-month-label"></span></h3>
+        <button class="add-budget-btn" onclick="openBudgetModal()">
+            <i class="fas fa-plus"></i> Thêm ngân sách
+        </button>
+    </div>
+    
+    <div class="budget-total">
+        <p>Tổng ngân sách: <strong id="total-budget">0đ</strong></p>
+        <p>Đã chi tiêu: <strong id="total-spent">0đ</strong></p>
+        <p>Còn lại: <strong id="total-remaining" class="text-success">0đ</strong></p>
+    </div>
+</div>
+    
+        <div class="budget-categories" id="budget-categories">
+         <!-- Danh sách ngân sách sẽ được JavaScript điền vào -->
+        </div>
+    </div>                           
+</div>
                 
                 <!-- Reports Page -->
                 <div class="page" id="reports-page">
@@ -617,6 +580,44 @@
             <button class="save-btn" onclick="exportToPDF()">
                 <i class="fas fa-download"></i> Xuất PDF
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Budget Modal -->
+<div class="modal" id="budget-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Thiết lập ngân sách</h3>
+            <button class="close-modal" onclick="closeModal('budget-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Danh mục</label>
+                <select class="form-input" id="budget-category-select">
+                    <option value="food">🍜 Ăn uống</option>
+                    <option value="transport">🚗 Di chuyển</option>
+                    <option value="shopping">🛍️ Mua sắm</option>
+                    <option value="bills">📄 Hóa đơn</option>
+                    <option value="entertainment">🎮 Giải trí</option>
+                    <option value="health">💊 Y tế</option>
+                    <option value="education">📚 Giáo dục</option>
+                    <option value="other">📦 Khác</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Số tiền ngân sách</label>
+                <input type="text" class="form-input" placeholder="0 đ" id="budget-amount-input" inputmode="numeric">
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal('budget-modal')">Hủy</button>
+            <button class="save-btn" onclick="saveBudget()">Lưu ngân sách</button>
         </div>
     </div>
 </div>

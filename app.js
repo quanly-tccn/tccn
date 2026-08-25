@@ -197,6 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteTransaction(id);
         }
     });
+    renderBudgets();
+    setupBudgetInput();
 });
 
 // Navigation
@@ -1268,4 +1270,201 @@ function exportToPDF() {
     };
     
     html2pdf().set(options).from(element).save();
+}
+
+// ==================== BUDGET MANAGEMENT ====================
+const BUDGET_STORAGE_KEY = 'expense_tracker_budgets';
+
+// State
+let budgets = loadBudgets();
+
+// Load budgets từ LocalStorage
+function loadBudgets() {
+    try {
+        const saved = localStorage.getItem(BUDGET_STORAGE_KEY);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (error) {
+        console.error('Lỗi khi đọc budgets:', error);
+    }
+    return {};
+}
+
+// Save budgets vào LocalStorage
+function saveBudgets() {
+    try {
+        localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(budgets));
+    } catch (error) {
+        console.error('Lỗi khi lưu budgets:', error);
+    }
+}
+
+// Mở modal thêm ngân sách
+function openBudgetModal() {
+    document.getElementById('budget-amount-input').value = '';
+    openModal('budget-modal');
+}
+
+// Lưu ngân sách mới
+function saveBudget() {
+    const category = document.getElementById('budget-category-select').value;
+    const amountInput = document.getElementById('budget-amount-input');
+    const amount = parseInt(amountInput.value.replace(/[^0-9]/g, '')) || 0;
+    
+    if (!amount) {
+        alert('Vui lòng nhập số tiền ngân sách!');
+        return;
+    }
+    
+    // Lấy tên danh mục
+    const categoryMap = {
+        food: { name: 'Ăn uống', icon: '🍜' },
+        transport: { name: 'Di chuyển', icon: '🚗' },
+        shopping: { name: 'Mua sắm', icon: '🛍️' },
+        bills: { name: 'Hóa đơn', icon: '📄' },
+        entertainment: { name: 'Giải trí', icon: '🎮' },
+        health: { name: 'Y tế', icon: '💊' },
+        education: { name: 'Giáo dục', icon: '📚' },
+        other: { name: 'Khác', icon: '📦' }
+    };
+    
+    budgets[category] = {
+        amount: amount,
+        name: categoryMap[category].name,
+        icon: categoryMap[category].icon
+    };
+    
+    saveBudgets();
+    renderBudgets();
+    closeModal('budget-modal');
+    
+    showNotification('Đã lưu ngân sách!');
+}
+
+// Xóa ngân sách
+function deleteBudget(category) {
+    if (confirm('Bạn có chắc muốn xóa ngân sách này?')) {
+        delete budgets[category];
+        saveBudgets();
+        renderBudgets();
+        showNotification('Đã xóa ngân sách!');
+    }
+}
+
+// Tính toán chi tiêu theo danh mục
+function calculateSpentByCategory(category) {
+    const currentMonth = getCurrentMonth();
+    
+    return transactions
+        .filter(t => 
+            t.type === 'expense' && 
+            t.category === category && 
+            t.date.startsWith(currentMonth)
+        )
+        .reduce((sum, t) => sum + t.amount, 0);
+}
+
+// Render danh sách ngân sách
+function renderBudgets() {
+    const container = document.getElementById('budget-categories');
+    
+    if (Object.keys(budgets).length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-wallet" style="font-size: 3rem; margin-bottom: 20px; color: #ccc;"></i>
+                <p>Chưa có ngân sách nào được thiết lập</p>
+                <p style="font-size: 0.9rem;">Hãy thêm ngân sách để kiểm soát chi tiêu tốt hơn</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let totalBudget = 0;
+    let totalSpent = 0;
+    
+    container.innerHTML = Object.entries(budgets).map(([category, budget]) => {
+        const spent = calculateSpentByCategory(category);
+        const percentage = budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
+        
+        totalBudget += budget.amount;
+        totalSpent += spent;
+        
+        // Xác định màu sắc dựa trên % chi tiêu
+        let progressClass = 'progress';
+        let statusText = '';
+        
+        if (percentage >= 100) {
+            progressClass += ' danger';
+            statusText = '⚠️ Vượt ngân sách!';
+        } else if (percentage >= 80) {
+            progressClass += ' warning';
+            statusText = '⚠️ Sắp vượt!';
+        } else {
+            statusText = '✅ An toàn';
+        }
+        
+        return `
+            <div class="budget-item">
+                <div class="budget-info">
+                    <span class="category-icon">${budget.icon}</span>
+                    <div>
+                        <p class="budget-name">${budget.name}</p>
+                        <p class="budget-amount">${formatCurrency(spent)} / ${formatCurrency(budget.amount)}</p>
+                    </div>
+                    <button class="action-btn" onclick="deleteBudget('${category}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="progress-bar">
+                    <div class="${progressClass}" style="width: ${Math.min(percentage, 100)}%"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p class="budget-percentage">${percentage}% - ${statusText}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Cập nhật tổng quan
+    const remaining = totalBudget - totalSpent;
+    document.getElementById('total-budget').textContent = formatCurrency(totalBudget);
+    document.getElementById('total-spent').textContent = formatCurrency(totalSpent);
+    
+    const remainingElement = document.getElementById('total-remaining');
+    remainingElement.textContent = formatCurrency(Math.abs(remaining));
+    remainingElement.className = remaining >= 0 ? 'text-success' : 'text-danger';
+    
+    if (remaining < 0) {
+        remainingElement.textContent = '-' + remainingElement.textContent;
+    }
+
+    // Cập nhật label tháng
+    const now = new Date();
+    document.getElementById('budget-month-label').textContent = 
+    `${now.getMonth() + 1}/${now.getFullYear()}`;
+}
+
+// Format input ngân sách
+function setupBudgetInput() {
+    const budgetInput = document.getElementById('budget-amount-input');
+    
+    if (budgetInput) {
+        budgetInput.addEventListener('input', function(e) {
+            if (e.inputType === 'deleteContentBackward' || 
+                e.inputType === 'deleteContentForward') {
+                return;
+            }
+            
+            let value = this.value.replace(/[^0-9]/g, '');
+            if (value) {
+                const formatted = parseInt(value, 10).toLocaleString('vi-VN');
+                this.value = formatted + ' đ';
+                const pos = formatted.length;
+                this.setSelectionRange(pos, pos);
+            } else {
+                this.value = '';
+            }
+        });
+    }
 }

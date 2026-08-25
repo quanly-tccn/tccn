@@ -1,5 +1,6 @@
-/* Reset và biến màu */
+/* ==================== ROOT VARIABLES ==================== */
 :root {
+    /* Colors */
     --primary-color: #3b82f6;
     --primary-dark: #2563eb;
     --success-color: #10b981;
@@ -10,13 +11,21 @@
     --text-primary: #1f2937;
     --text-secondary: #6b7280;
     --border-color: #e5e7eb;
+    
+    /* Layout */
     --sidebar-width: 250px;
     --header-height: 70px;
+    
+    /* Effects */
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
+    
+    /* Font */
+    --font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* ==================== RESET & BASE ==================== */
 * {
     margin: 0;
     padding: 0;
@@ -24,20 +33,26 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--font-family);
     background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
 }
 
-/* App Container */
+/* ==================== LAYOUT ==================== */
 .app-container {
     display: flex;
     min-height: 100vh;
 }
 
-/* Sidebar */
+.main-content {
+    flex: 1;
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+}
+
+/* ==================== SIDEBAR ==================== */
 .sidebar {
     width: var(--sidebar-width);
     background: var(--card-bg);
@@ -145,22 +160,10 @@ body {
     color: var(--text-secondary);
 }
 
-/* Main Content */
-.main-content {
-    flex: 1;
-    margin-left: var(--sidebar-width);
-    min-height: 100vh;
-}
-
-/* ==================== TOP HEADER ==================== */
+/* ==================== HEADER ==================== */
 .top-header {
     height: var(--header-height);
-    background: linear-gradient(
-        135deg,
-        #1376b8 0%,
-        #d4eaf0 50%,
-        #0ccaba 100%
-    );
+    background: linear-gradient(135deg, #1376b8 0%, #d4eaf0 50%, #0ccaba 100%);
     border-bottom: 1px solid #b8dde8;
     display: flex;
     align-items: center;
@@ -214,13 +217,13 @@ body {
     letter-spacing: 0.5px;
     line-height: 1.3;
     color: #691b0d;
-    white-space: nowrap;  /* Ngăn xuống dòng */
+    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;  /* Thêm dấu ... nếu quá dài */
+    text-overflow: ellipsis;
 }
 
 .header-right {
-     display: flex;
+    display: flex;
     align-items: center;
     gap: 12px;
     position: relative;
@@ -229,21 +232,29 @@ body {
     justify-content: flex-end;
 }
 
+/* Notification & Add Button */
+.notification-btn,
+.add-transaction-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
 .notification-btn {
     position: relative;
     background: rgba(255, 255, 255, 0.5);
     border: 1px solid rgba(90, 138, 158, 0.3);
-    font-size: 1.1rem;
-    cursor: pointer;
     color: #5a8a9e;
     padding: 8px;
     border-radius: 50%;
-    transition: var(--transition);
     width: 38px;
     height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .notification-btn:hover {
@@ -269,16 +280,8 @@ body {
 .add-transaction-btn {
     background: linear-gradient(135deg, #6ba3c7 0%, #5a8a9e 100%);
     color: white;
-    border: none;
     padding: 10px 18px;
     border-radius: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: var(--transition);
-    font-weight: 500;
-    font-size: 0.9rem;
     box-shadow: 0 2px 8px rgba(90, 138, 158, 0.3);
 }
 
@@ -293,11 +296,7 @@ body {
     box-shadow: 0 2px 6px rgba(90, 138, 158, 0.3);
 }
 
-.add-transaction-btn i {
-    font-size: 0.9rem;
-}
-
-/* Page Content */
+/* ==================== PAGE CONTENT ==================== */
 .page-content {
     padding: 30px;
 }
@@ -314,15 +313,26 @@ body {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        /* transform: translateY(10px);*/
     }
     to {
         opacity: 1;
-        /*transform: translateY(0);*/
     }
 }
 
-/* Summary Cards */
+/* ==================== CARDS ==================== */
+.card,
+.chart-card,
+.recent-transactions,
+.budget-overview,
+.budget-categories,
+.goal-card,
+.settings-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
 .summary-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -331,20 +341,10 @@ body {
 }
 
 .card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px;
     display: flex;
     align-items: flex-start;
     gap: 15px;
-    box-shadow: var(--shadow);
     transition: var(--transition);
-    flex-direction: row;  /* ← Đảm bảo nằm ngang */
-}
-
-.card-info {
-    flex: 1;
-    min-width: 0;
 }
 
 .card:hover {
@@ -360,27 +360,19 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
+    flex-shrink: 0;
 }
 
-.balance-card .card-icon {
-    background: #eff6ff;
-    color: var(--primary-color);
+.card-info {
+    flex: 1;
+    min-width: 0;
 }
 
-.income-card .card-icon {
-    background: #ecfdf5;
-    color: var(--success-color);
-}
-
-.expense-card .card-icon {
-    background: #fef2f2;
-    color: var(--danger-color);
-}
-
-.savings-card .card-icon {
-    background: #fffbeb;
-    color: var(--warning-color);
-}
+/* Card variants */
+.balance-card .card-icon { background: #eff6ff; color: var(--primary-color); }
+.income-card .card-icon { background: #ecfdf5; color: var(--success-color); }
+.expense-card .card-icon { background: #fef2f2; color: var(--danger-color); }
+.savings-card .card-icon { background: #fffbeb; color: var(--warning-color); }
 
 .card-label {
     font-size: 0.85rem;
@@ -401,15 +393,10 @@ body {
     line-height: 1.3;
 }
 
-.card-change.positive {
-    color: var(--success-color);
-}
+.card-change.positive { color: var(--success-color); }
+.card-change.negative { color: var(--danger-color); }
 
-.card-change.negative {
-    color: var(--danger-color);
-}
-
-/* Charts */
+/* ==================== CHARTS ==================== */
 .charts-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -418,10 +405,9 @@ body {
 }
 
 .chart-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: var(--shadow);
+    position: relative;
+    height: auto;
+    min-height: 350px;
 }
 
 .chart-card h3 {
@@ -433,14 +419,17 @@ body {
     grid-column: 1 / -1;
 }
 
-/* Transactions */
-.recent-transactions {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: var(--shadow);
+.chart-card canvas {
+    max-height: 300px !important;
+    width: 100% !important;
 }
 
+.chart-card.large canvas {
+    max-height: 400px !important;
+    min-height: 300px !important;
+}
+
+/* ==================== TRANSACTIONS ==================== */
 .section-header {
     display: flex;
     justify-content: space-between;
@@ -516,13 +505,8 @@ body {
     font-size: 1rem;
 }
 
-.transaction-amount.income {
-    color: var(--success-color);
-}
-
-.transaction-amount.expense {
-    color: var(--danger-color);
-}
+.transaction-amount.income { color: var(--success-color); }
+.transaction-amount.expense { color: var(--danger-color); }
 
 .transaction-actions {
     display: flex;
@@ -548,7 +532,7 @@ body {
     color: var(--primary-color);
 }
 
-/* Filters */
+/* ==================== FILTERS ==================== */
 .filters-bar {
     display: flex;
     gap: 15px;
@@ -570,43 +554,136 @@ body {
     color: var(--text-secondary);
 }
 
-.search-box input {
-    width: 100%;
-    padding: 10px 10px 10px 35px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.9rem;
-}
-
+.search-box input,
 .filter-select,
-.date-filter {
+.date-filter,
+.price-range input {
+    width: 100%;
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
+    font-family: var(--font-family);
+    transition: var(--transition);
+    box-sizing: border-box;
+}
+
+.search-box input {
+    padding: 10px 10px 10px 35px;
+}
+
+.filter-select,
+.date-filter {
     background: var(--card-bg);
 }
 
-/* Budget Page */
-.budget-overview {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
+.filter-select:focus,
+.date-filter:focus,
+.price-range input:focus,
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.price-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.price-range input {
+    min-height: 42px;
+}
+
+.price-range span {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.clear-filter-btn {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: var(--transition);
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.clear-filter-btn:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.result-count {
+    padding: 10px 15px;
+    background: #f0f9ff;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: #2c5282;
+}
+
+.result-count strong {
+    font-weight: 700;
+    color: #1a365d;
+}
+
+.highlight {
+    background: #fef08a;
+    color: #854d0e;
+    font-weight: 700;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* ==================== BUDGET ==================== */
+.budget-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.budget-header h3 {
+    font-size: 1.3rem;
+    color: #2c5282;
+    margin: 0;
+}
+
+.add-budget-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    width: fit-content;
+}
+
+.add-budget-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .budget-total {
     display: flex;
     gap: 30px;
     margin-top: 15px;
-}
-
-.budget-categories {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: var(--shadow);
 }
 
 .budget-item {
@@ -650,13 +727,8 @@ body {
     transition: var(--transition);
 }
 
-.progress.warning {
-    background: var(--warning-color);
-}
-
-.progress.danger {
-    background: var(--danger-color);
-}
+.progress.warning { background: var(--warning-color); }
+.progress.danger { background: var(--danger-color); }
 
 .budget-percentage {
     font-size: 0.85rem;
@@ -664,25 +736,7 @@ body {
     text-align: right;
 }
 
-.add-budget-btn {
-    width: 100%;
-    padding: 15px;
-    background: none;
-    border: 2px dashed var(--border-color);
-    border-radius: 8px;
-    margin-top: 20px;
-    cursor: pointer;
-    color: var(--text-secondary);
-    transition: var(--transition);
-}
-
-.add-budget-btn:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: #eff6ff;
-}
-
-/* Reports */
+/* ==================== REPORTS ==================== */
 .report-controls {
     display: flex;
     justify-content: space-between;
@@ -725,18 +779,11 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
-/* Goals */
+/* ==================== GOALS ==================== */
 .goals-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
-}
-
-.goal-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: var(--shadow);
 }
 
 .goal-header {
@@ -791,15 +838,7 @@ body {
     font-size: 2rem;
 }
 
-/* Settings */
-.settings-section {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-}
-
+/* ==================== SETTINGS ==================== */
 .settings-section h3 {
     margin-bottom: 20px;
 }
@@ -812,6 +851,7 @@ body {
 .settings-form label {
     font-weight: 600;
     font-size: 0.9rem;
+    color: #4a5568;
 }
 
 .settings-input {
@@ -819,6 +859,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
+    font-family: var(--font-family);
 }
 
 .settings-option {
@@ -839,6 +880,7 @@ body {
     color: var(--text-secondary);
 }
 
+/* Toggle Switch */
 .toggle-switch {
     position: relative;
     display: inline-block;
@@ -899,7 +941,7 @@ body {
     background: #dc2626;
 }
 
-/* Modal */
+/* ==================== MODAL ==================== */
 .modal {
     display: none;
     position: fixed;
@@ -924,7 +966,8 @@ body {
     max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
-    font-family: 'Be Vietnam Pro', sans-serif;  /* ← Thêm font */
+    font-family: var(--font-family);
+    animation: slideUp 0.3s ease;
 }
 
 @keyframes slideUp {
@@ -972,8 +1015,8 @@ body {
     background: none;
     cursor: pointer;
     font-weight: 600;
-    font-size: 1.1rem;  /* ← Tăng lên 1.1rem */
-    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 1.1rem;
+    font-family: var(--font-family);
     transition: var(--transition);
 }
 
@@ -992,7 +1035,7 @@ body {
     margin-bottom: 5px;
     font-weight: 600;
     font-size: 0.9rem;
-    font-family: 'Be Vietnam Pro', sans-serif;
+    font-family: var(--font-family);
     color: #4a5568;
 }
 
@@ -1002,12 +1045,11 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.9rem;
-    font-family: 'Be Vietnam Pro', sans-serif;
+    font-family: var(--font-family);
     transition: var(--transition);
-    box-sizing: border-box;  /* ← Thêm dòng này */
+    box-sizing: border-box;
 }
 
-/* Fix riêng cho input type date */
 input[type="date"].form-input {
     width: 100%;
     max-width: 100%;
@@ -1026,7 +1068,6 @@ input[type="date"].form-input {
     border-top: 1px solid var(--border-color);
 }
 
-/* Nút Hủy trong bảng Thêm giao dịch mới */
 .cancel-btn,
 .save-btn {
     padding: 12px 24px;
@@ -1034,7 +1075,7 @@ input[type="date"].form-input {
     cursor: pointer;
     font-weight: 500;
     font-size: 1rem;
-    font-family: 'Be Vietnam Pro', sans-serif;
+    font-family: var(--font-family);
     transition: var(--transition);
 }
 
@@ -1054,7 +1095,16 @@ input[type="date"].form-input {
     background: var(--primary-dark);
 }
 
-/* Responsive Design */
+/* ==================== UTILITIES ==================== */
+.text-success { color: var(--success-color); }
+.text-danger { color: var(--danger-color); }
+.text-warning { color: var(--warning-color); }
+.text-primary { color: var(--primary-color); }
+
+.mt-20 { margin-top: 20px; }
+.mb-20 { margin-bottom: 20px; }
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
@@ -1066,7 +1116,7 @@ input[type="date"].form-input {
     
     .close-sidebar,
     .menu-toggle {
-        display: flex;  /* ← Đổi từ block thành flex */
+        display: flex;
     }
     
     .main-content {
@@ -1078,18 +1128,27 @@ input[type="date"].form-input {
         height: 60px;
     }
     
+    .header-title-wrapper {
+        max-width: 45%;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
     .header-title {
-        font-size: 0.9rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 0.85rem;
+        white-space: normal;
+        line-height: 1.2;
+        overflow: visible;
+        text-overflow: clip;
+        display: block;
+        text-align: center;
     }
     
     .page-content {
         padding: 15px;
     }
     
-    /* Summary Cards - 2 cột */
     .summary-cards {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -1098,29 +1157,23 @@ input[type="date"].form-input {
     }
     
     .card {
-        flex-direction: row;
-        align-items: center;
-        padding: 15px;
-        gap: 10px;
-    }
-    
-    .card {
         padding: 15px;
         gap: 10px;
         align-items: flex-start;
     }
     
-
     .card-icon {
         width: 25px;
         height: 25px;
         font-size: 1rem;
-        flex-shrink: 0;  /* ← Không cho icon bị co lại */
+        flex-shrink: 0;
     }
-    card-info {
-        flex: 1;  /* ← Cho phép nội dung chiếm phần còn lại */
-        min-width: 0;  /* ← Cho phép text wrap */
+    
+    .card-info {
+        flex: 1;
+        min-width: 0;
     }
+    
     .card-label {
         font-size: 0.75rem;
         margin-bottom: 3px;
@@ -1159,6 +1212,15 @@ input[type="date"].form-input {
     
     .filters-bar {
         flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-box,
+    .filter-select,
+    .date-filter,
+    .clear-filter-btn,
+    .price-range {
+        width: 100%;
     }
     
     .budget-total {
@@ -1169,52 +1231,34 @@ input[type="date"].form-input {
     .transaction-actions {
         opacity: 1;
     }
+    
+    .budget-overview .section-header {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .budget-overview .section-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .add-budget-btn {
+        padding: 8px 15px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    
+    .price-range input {
+        min-height: 40px;
+    }
+    
+    /* Ngăn zoom trên mobile */
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
 }
-    @media (max-width: 768px) {
-    .top-header {
-        padding: 0 15px;
-        height: 60px;
-    }
-    
-    .header-title-wrapper {
-        max-width: 45%;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-    }
-    
-    .header-title {
-        font-size: 0.85rem;
-        white-space: normal;  /* ← Cho phép xuống dòng */
-        line-height: 1.2;
-        overflow: visible;
-        text-overflow: clip;
-        display: block;
-        text-align: center;
-    }
-}
-    
-    .add-transaction-btn span {
-        display: none;
-    }
-    
-    .add-transaction-btn {
-        padding: 8px;
-        border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        justify-content: center;
-    }
-    
-    .menu-toggle {
-        display: block;
-    }
-    
-    .notification-btn {
-        width: 34px;
-        height: 34px;
-        font-size: 1rem;
-    }
 
 @media (max-width: 480px) {
     .header-left h1 {
@@ -1228,182 +1272,4 @@ input[type="date"].form-input {
     .modal-content {
         width: 95%;
     }
-}
-
-/* Utility Classes */
-.text-success {
-    color: var(--success-color);
-}
-
-.text-danger {
-    color: var(--danger-color);
-}
-
-.text-warning {
-    color: var(--warning-color);
-}
-
-.text-primary {
-    color: var(--primary-color);
-}
-
-.mt-20 {
-    margin-top: 20px;
-}
-
-.mb-20 {
-    margin-bottom: 20px;
-}
-canvas {
-    max-height: 300px !important;
-}
-.modal-body input[type="date"] {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    padding: 8px 10px;
-    font-size: 0.85rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-family: inherit;
-}
-/* ==================== FIX DATE INPUT MOBILE ==================== */
-@media (max-width: 768px) {
-    .form-input {
-        font-size: 0.85rem;
-        padding: 8px;
-    }
-    
-    input[type="date"].form-input {
-        width: 100%;
-        max-width: 100%;
-    }
-}
-/* Đảm bảo chart có chiều cao phù hợp */
-.chart-card {
-    position: relative;
-    height: auto;
-    min-height: 350px;
-}
-
-.chart-card canvas {
-    max-height: 300px !important;
-    width: 100% !important;
-}
-
-/* Chart lớn hơn cho báo cáo */
-.chart-card.large canvas {
-    max-height: 400px !important;
-    min-height: 300px !important;
-}
-
-/* Ngăn zoom trên mobile cho tất cả input */
-@media (max-width: 768px) {
-    input,
-    select,
-    textarea {
-        font-size: 16px !important;
-    }
-}
-
-/* Result count */
-.result-count {
-    padding: 10px 15px;
-    background: #f0f9ff;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-    color: #2c5282;
-}
-
-.result-count strong {
-    font-weight: 700;
-    color: #1a365d;
-}
-
-/* Clear filter button */
-.clear-filter-btn {
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: var(--transition);
-    font-size: 0.9rem;
-    color: #6b7280;
-}
-
-.clear-filter-btn:hover {
-    background: #e5e7eb;
-    color: #374151;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .filters-bar {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .search-box {
-        width: 100%;
-    }
-    
-    .filter-select,
-    .date-filter,
-    .clear-filter-btn {
-        width: 100%;
-    }
-}
-
-/* Price range inputs */
-.price-range {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.price-range input {
-    padding: 12px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    width: 100%;
-    min-height: 42px;
-    transition: var(--transition);
-}
-
-.price-range input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.price-range span {
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-/* Responsive mobile */
-@media (max-width: 768px) {
-    .price-range {
-        width: 100%;
-    }
-    
-    .price-range input {
-        min-height: 40px;
-    }
-}
-
-/* Highlight text */
-.highlight {
-    background: #fef08a;
-    color: #854d0e;
-    font-weight: 700;
-    padding: 2px 4px;
-    border-radius: 3px;
 }
