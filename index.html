@@ -140,7 +140,7 @@
                                 <i class="fas fa-piggy-bank"></i>
                             </div>
                             <div class="card-info">
-                                <p class="card-label">Tiết kiệm</p>
+                                <p class="card-label">Tiết kiệm được</p>
                                 <h3 class="card-value">0đ</h3>
                                 <p class="card-change">Đạt 40% mục tiêu</p>
                             </div>
@@ -169,34 +169,35 @@
                     </div>
                 </div>
                 
+            <!-- Transactions Page -->
               <div class="page" id="transactions-page">
-    <div class="filters-bar">
-        <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="Tìm kiếm giao dịch..." id="search-input" oninput="filterTransactions()">
-        </div>
-        <select class="filter-select" id="filter-type" onchange="filterTransactions()">
-            <option value="all">Tất cả loại</option>
-            <option value="income">Thu nhập</option>
-            <option value="expense">Chi tiêu</option>
-        </select>
-        <select class="filter-select" id="filter-category" onchange="filterTransactions()">
-            <option value="all">Tất cả danh mục</option>
-            <option value="food">🍜 Ăn uống</option>
-            <option value="transport">🚗 Di chuyển</option>
-            <option value="shopping">🛍️ Mua sắm</option>
-            <option value="bills">📄 Hóa đơn</option>
-            <option value="entertainment">🎮 Giải trí</option>
-            <option value="health">💊 Y tế</option>
-            <option value="education">📚 Giáo dục</option>
-            <option value="salary">💰 Lương</option>
-            <option value="bonus">🎁 Thưởng</option>
-            <option value="investment">📈 Đầu tư</option>
-            <option value="freelance">💻 Freelance</option>
-            <option value="business">🏪 Kinh doanh</option>
-            <option value="gift">🎀 Quà tặng</option>
-            <option value="other">📦 Khác</option>
-        </select>
+                <div class="filters-bar">
+                <div class="search-box">
+                <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Tìm kiếm giao dịch..." id="search-input" oninput="filterTransactions()">
+                 </div>
+            <select class="filter-select" id="filter-type" onchange="filterTransactions()">
+                <option value="all">Tất cả loại</option>
+                <option value="income">Thu nhập</option>
+                <option value="expense">Chi tiêu</option>
+            </select>
+            <select class="filter-select" id="filter-category" onchange="filterTransactions()">
+                <option value="all">Tất cả danh mục</option>
+                <option value="food">🍜 Ăn uống</option>
+                <option value="transport">🚗 Di chuyển</option>
+                <option value="shopping">🛍️ Mua sắm</option>
+                <option value="bills">📄 Hóa đơn</option>
+                <option value="entertainment">🎮 Giải trí</option>
+                <option value="health">💊 Y tế</option>
+                <option value="education">📚 Giáo dục</option>
+                <option value="salary">💰 Lương</option>
+                <option value="bonus">🎁 Thưởng</option>
+                <option value="investment">📈 Đầu tư</option>
+                <option value="freelance">💻 Freelance</option>
+                <option value="business">🏪 Kinh doanh</option>
+                <option value="gift">🎀 Quà tặng</option>
+                <option value="other">📦 Khác</option>
+            </select>
         <input type="date" class="date-filter" id="filter-date" onchange="filterTransactions()">
         
         <!-- Sắp xếp -->
@@ -296,113 +297,81 @@
                 
                 <!-- Goals Page -->
                 <div class="page" id="goals-page">
-                    <div class="goals-grid">
-                        <div class="goal-card">
-                            <div class="goal-header">
-                                <span class="goal-icon">🚗</span>
-                                <div>
-                                    <h4>Mua xe máy</h4>
-                                    <p class="goal-deadline">Hạn: 12/2026</p>
-                                </div>
-                            </div>
-                            <div class="goal-progress">
-                                <p>Tích lũy: <strong>15,000,000đ</strong> / 50,000,000đ</p>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 30%"></div>
-                                </div>
-                                <p class="goal-percentage">30% hoàn thành</p>
-                            </div>
-                        </div>
-                        
-                        <div class="goal-card">
-                            <div class="goal-header">
-                                <span class="goal-icon">✈️</span>
-                                <div>
-                                    <h4>Du lịch Đà Nẵng</h4>
-                                    <p class="goal-deadline">Hạn: 06/2026</p>
-                                </div>
-                            </div>
-                            <div class="goal-progress">
-                                <p>Tích lũy: <strong>5,000,000đ</strong> / 10,000,000đ</p>
-                                <div class="progress-bar">
-                                    <div class="progress" style="width: 50%"></div>
-                                </div>
-                                <p class="goal-percentage">50% hoàn thành</p>
-                            </div>
-                        </div>
-                        
-                        <div class="goal-card add-goal">
-                            <button onclick="alert('Thêm mục tiêu mới')">
-                                <i class="fas fa-plus"></i>
-                                <span>Thêm mục tiêu mới</span>
-                            </button>
-                        </div>
+                    <div class="goals-header">
+                        <h3>Mục tiêu tiết kiệm</h3>
+                        <button class="add-goal-btn" onclick="openGoalModal()">
+                            <i class="fas fa-plus"></i> Thêm mục tiêu
+                        </button>
+                    </div>
+                    
+                    <div class="goals-grid" id="goals-container">
+                        <!-- JavaScript sẽ render mục tiêu vào đây -->
                     </div>
                 </div>
                 
-                <!-- Settings Page -->
-                <div class="page" id="settings-page">
-                    <div class="settings-section">
-                        <h3>Thông tin cá nhân</h3>
-                        <div class="settings-form">
-                            <label>Tên người dùng</label>
-                            <input type="text" value="Người dùng" class="settings-input">
-                            
-                            <label>Email</label>
-                            <input type="email" value="user@email.com" class="settings-input">
-                            
-                            <label>Số điện thoại</label>
-                            <input type="tel" placeholder="Nhập số điện thoại" class="settings-input">
-                        </div>
-                    </div>
-                    
-                    <div class="settings-section">
-                        <h3>Tùy chọn</h3>
-                        <div class="settings-option">
-                            <div>
-                                <p class="option-title">Thông báo</p>
-                                <p class="option-desc">Nhận thông báo khi vượt ngân sách</p>
+                        <!-- Settings Page -->
+                    <div class="page" id="settings-page">
+                        <div class="settings-section">
+                            <h3>Thông tin cá nhân</h3>
+                            <div class="settings-form">
+                                <label>Tên người dùng</label>
+                                <input type="text" value="Người dùng" class="settings-input">
+                                
+                                <label>Email</label>
+                                <input type="email" value="user@email.com" class="settings-input">
+                                
+                                <label>Số điện thoại</label>
+                                <input type="tel" placeholder="Nhập số điện thoại" class="settings-input">
                             </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
                         </div>
                         
-                        <div class="settings-option">
-                            <div>
-                                <p class="option-title">Đồng bộ tự động</p>
-                                <p class="option-desc">Tự động đồng bộ dữ liệu lên cloud</p>
+                        <div class="settings-section">
+                            <h3>Tùy chọn</h3>
+                            <div class="settings-option">
+                                <div>
+                                    <p class="option-title">Thông báo</p>
+                                    <p class="option-desc">Nhận thông báo khi vượt ngân sách</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
                             </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
+                            
+                            <div class="settings-option">
+                                <div>
+                                    <p class="option-title">Đồng bộ tự động</p>
+                                    <p class="option-desc">Tự động đồng bộ dữ liệu lên cloud</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-option">
+                                <div>
+                                    <p class="option-title">Chế độ tối (Dark Mode)</p>
+                                    <p class="option-desc">Sử dụng giao diện tối cho ban đêm</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
                         </div>
                         
-                        <div class="settings-option">
-                            <div>
-                                <p class="option-title">Chế độ tối</p>
-                                <p class="option-desc">Sử dụng giao diện tối</p>
-                            </div>
-                            <label class="toggle-switch">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
-                            </label>
+                        <div class="settings-section">
+                            <h3>Dữ liệu</h3>
+                            <button class="danger-btn" onclick="alert('Xuất dữ liệu')">
+                                <i class="fas fa-download"></i> Xuất dữ liệu
+                            </button>
+                            <button class="danger-btn" onclick="alert('Xóa tất cả dữ liệu')">
+                                <i class="fas fa-trash"></i> Xóa tất cả dữ liệu
+                            </button>
                         </div>
                     </div>
-                    
-                    <div class="settings-section">
-                        <h3>Dữ liệu</h3>
-                        <button class="danger-btn" onclick="alert('Xuất dữ liệu')">
-                            <i class="fas fa-download"></i> Xuất dữ liệu
-                        </button>
-                        <button class="danger-btn" onclick="alert('Xóa tất cả dữ liệu')">
-                            <i class="fas fa-trash"></i> Xóa tất cả dữ liệu
-                        </button>
-                    </div>
-                </div>
-            </div>
+
         </main>
     </div>
     
@@ -618,6 +587,59 @@
         <div class="modal-footer">
             <button class="cancel-btn" onclick="closeModal('budget-modal')">Hủy</button>
             <button class="save-btn" onclick="saveBudget()">Lưu ngân sách</button>
+        </div>
+    </div>
+</div>
+
+<!-- Goal Modal -->
+<div class="modal" id="goal-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Thêm mục tiêu tiết kiệm</h3>
+            <button class="close-modal" onclick="closeModal('goal-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Tên mục tiêu</label>
+                <input type="text" class="form-input" placeholder="VD: Mua xe máy" id="goal-name-input">
+            </div>
+            
+            <div class="form-group">
+                <label>Icon</label>
+                <select class="form-input" id="goal-icon-select">
+                    <option value="🚗">🚗 Xe cộ</option>
+                    <option value="✈️">✈️ Du lịch</option>
+                    <option value="🏠">🏠 Nhà cửa</option>
+                    <option value="💻">💻 Điện tử</option>
+                    <option value="📱">📱 Điện thoại</option>
+                    <option value="🎓">🎓 Học tập</option>
+                    <option value="💍">💍 Trang sức</option>
+                    <option value="🎁">🎁 Khác</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Số tiền mục tiêu</label>
+                <input type="text" class="form-input" placeholder="0 đ" id="goal-target-input" inputmode="numeric" oninput="handleGoalAmountInput(this)">
+            </div>
+
+            <div class="form-group">
+                <label>Số tiền đã tiết kiệm</label>
+                <input type="text" class="form-input" placeholder="0 đ" id="goal-current-input" inputmode="numeric" oninput="handleGoalAmountInput(this)">
+            </div>
+            
+            <div class="form-group">
+                <label>Ngày hoàn thành dự kiến</label>
+                <input type="date" class="form-input" id="goal-deadline-input">
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal('goal-modal')">Hủy</button>
+            <button class="save-btn" onclick="saveGoal()">Lưu mục tiêu</button>
         </div>
     </div>
 </div>

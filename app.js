@@ -177,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCategorySelect('expense');  // ← Thêm dòng này để khởi tạo danh mục mặc định
     setupAmountInput();
     updateDashboardStats(); // Cập nhật số liệu thống kê
+    
 
     // Thêm event listener cho input số tiền
     const amountInput = document.getElementById('amount-input');
@@ -199,6 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     renderBudgets();
     setupBudgetInput();
+    initDarkMode();
+    renderGoals();
 });
 
 // Navigation
@@ -423,8 +426,9 @@ function calculateBalance() {
 
 // Tính tổng tiết kiệm (ví dụ: 20% thu nhập)
 function calculateSavings() {
-    const monthlyIncome = calculateMonthlyIncome();
-    return Math.round(monthlyIncome * 0.2); // Giả định tiết kiệm 20% thu nhập
+    // Tổng tiền đã tiết kiệm từ tất cả mục tiêu
+    const totalSavings = goals.reduce((sum, goal) => sum + (goal.current || 0), 0);
+    return totalSavings;
 }
 
 // Cập nhật tất cả số liệu trên dashboard
@@ -442,8 +446,8 @@ function updateDashboardStats() {
     document.querySelector('.expense-card .card-value').textContent = formatCurrency(monthlyExpense);
     
     // Cập nhật tiết kiệm
-    const savings = calculateSavings();
-    document.querySelector('.savings-card .card-value').textContent = formatCurrency(savings);
+    const totalSavings = calculateSavings();
+    document.querySelector('.savings-card .card-value').textContent = formatCurrency(totalSavings);
     
     // Cập nhật số lượng giao dịch
     const incomeCount = transactions.filter(t => 
@@ -455,8 +459,20 @@ function updateDashboardStats() {
         t.type === 'expense' && t.date.startsWith(getCurrentMonth())
     ).length;
     document.querySelector('.expense-card .card-change').textContent = `${expenseCount} giao dịch`;
-updateAllCharts();
+
+     // Cập nhật tiết kiệm
+    const savings = calculateSavings();
+    document.querySelector('.savings-card .card-value').textContent = formatCurrency(savings);
+    
+    // Cập nhật % mục tiêu
+    const totalTarget = goals.reduce((sum, goal) => sum + goal.target, 0);
+    if (totalTarget > 0) {
+        const percentage = Math.round((savings / totalTarget) * 100);
+        document.querySelector('.savings-card .card-change').textContent = `Đạt ${percentage}% mục tiêu`;
+    }
+    updateAllCharts();
 }
+
 
 function renderTransactions() {
     const recentContainer = document.getElementById('recent-transactions');
@@ -1494,5 +1510,212 @@ function setupBudgetInput() {
                 this.value = '';
             }
         });
+    }
+}
+
+// ==================== DARK MODE ====================
+const DARK_MODE_KEY = 'expense_tracker_dark_mode';
+
+// Kiểm tra dark mode đã được bật chưa
+function isDarkMode() {
+    try {
+        const saved = localStorage.getItem(DARK_MODE_KEY);
+        if (saved !== null) {
+            return saved === 'true';
+        }
+        // Mặc định theo giờ (tối từ 18h đến 6h)
+        const hour = new Date().getHours();
+        return hour >= 18 || hour < 6;
+    } catch (error) {
+        return false;
+    }
+}
+
+// Bật/tắt dark mode
+function toggleDarkMode() {
+    const isDark = document.getElementById('dark-mode-toggle').checked;
+    
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem(DARK_MODE_KEY, 'true');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem(DARK_MODE_KEY, 'false');
+    }
+}
+
+// Khởi tạo dark mode
+function initDarkMode() {
+    const isDark = isDarkMode();
+    const toggle = document.getElementById('dark-mode-toggle');
+    
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        if (toggle) toggle.checked = true;
+    } else {
+        document.body.classList.remove('dark-mode');
+        if (toggle) toggle.checked = false;
+    }
+}
+
+// ==================== SAVINGS GOALS ====================
+const GOALS_STORAGE_KEY = 'expense_tracker_goals';
+
+// State
+let goals = loadGoals();
+
+// Load goals từ LocalStorage
+function loadGoals() {
+    try {
+        const saved = localStorage.getItem(GOALS_STORAGE_KEY);
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (error) {
+        console.error('Lỗi khi đọc goals:', error);
+    }
+    return [];
+}
+
+// Save goals vào LocalStorage
+function saveGoals() {
+    try {
+        localStorage.setItem(GOALS_STORAGE_KEY, JSON.stringify(goals));
+    } catch (error) {
+        console.error('Lỗi khi lưu goals:', error);
+    }
+}
+
+// Mở modal thêm mục tiêu
+function openGoalModal() {
+    document.getElementById('goal-name-input').value = '';
+    document.getElementById('goal-target-input').value = '';
+    document.getElementById('goal-current-input').value = '';
+    document.getElementById('goal-deadline-input').value = '';
+    openModal('goal-modal');
+}
+
+// Lưu mục tiêu mới
+function saveGoal() {
+   const name = document.getElementById('goal-name-input').value.trim();
+    const icon = document.getElementById('goal-icon-select').value;
+    const target = parseInt(document.getElementById('goal-target-input').value.replace(/[^0-9]/g, '')) || 0;
+    const current = parseInt(document.getElementById('goal-current-input').value.replace(/[^0-9]/g, '')) || 0;
+    const deadline = document.getElementById('goal-deadline-input').value;
+    
+    if (!name || !target) {
+        alert('Vui lòng nhập đầy đủ thông tin!');
+        return;
+    }
+    
+    const newGoal = {
+        id: Date.now(),
+        name: name,
+        icon: icon,
+        target: target,
+        current: current,
+        deadline: deadline || 'Không có hạn'
+    };
+    
+    goals.push(newGoal);
+    saveGoals();
+    renderGoals();
+    closeModal('goal-modal');
+    updateDashboardStats();
+    
+    showNotification('Đã thêm mục tiêu tiết kiệm!');
+}
+
+// Xóa mục tiêu
+function deleteGoal(id) {
+    if (confirm('Bạn có chắc muốn xóa mục tiêu này?')) {
+        goals = goals.filter(g => g.id !== id);
+        saveGoals();
+        renderGoals();
+        updateDashboardStats();
+        showNotification('Đã xóa mục tiêu!');
+    }
+}
+
+// Cập nhật số tiền đã tiết kiệm
+function updateGoalProgress(id) {
+    const goal = goals.find(g => g.id === id);
+    if (!goal) return;
+    
+    const newAmount = prompt('Nhập số tiền đã tiết kiệm:', goal.current);
+    if (newAmount === null) return;
+    
+    const amount = parseInt(newAmount.replace(/[^0-9]/g, '')) || 0;
+    goal.current = amount;
+    saveGoals();
+    renderGoals();
+    updateDashboardStats();
+    showNotification('Đã cập nhật tiến độ!');
+}
+
+// Render danh sách mục tiêu
+function renderGoals() {
+    const container = document.getElementById('goals-container');
+    
+    if (goals.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <i class="fas fa-bullseye" style="font-size: 3rem; margin-bottom: 20px; color: #ccc;"></i>
+                <p>Chưa có mục tiêu tiết kiệm nào</p>
+                <p style="font-size: 0.9rem;">Hãy đặt mục tiêu để có động lực tiết kiệm!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = goals.map(goal => {
+        const percentage = goal.target > 0 ? Math.round((goal.current / goal.target) * 100) : 0;
+        
+        return `
+            <div class="goal-card">
+                <div class="goal-header">
+                    <span class="goal-icon">${goal.icon}</span>
+                    <div>
+                        <h4>${goal.name}</h4>
+                        <p class="goal-deadline">Hạn: ${goal.deadline}</p>
+                    </div>
+                    <button class="action-btn" onclick="deleteGoal(${goal.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="goal-progress">
+                    <p>Tích lũy: <strong>${formatCurrency(goal.current)}</strong> / ${formatCurrency(goal.target)}</p>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${Math.min(percentage, 100)}%"></div>
+                    </div>
+                    <p class="goal-percentage">${percentage}% hoàn thành</p>
+                </div>
+                <button class="update-progress-btn" onclick="updateGoalProgress(${goal.id})">
+                    <i class="fas fa-edit"></i> Cập nhật tiến độ
+                </button>
+            </div>
+        `;
+    }).join('');
+}
+
+function handleGoalAmountInput(input) {
+    // Lưu vị trí con trỏ
+    const cursorPos = input.selectionStart;
+    
+    // Lấy giá trị, loại bỏ tất cả trừ số
+    let value = input.value.replace(/[^0-9]/g, '');
+    
+    // Format nếu có giá trị
+    if (value) {
+        const formatted = parseInt(value, 10).toLocaleString('vi-VN');
+        
+        // Chỉ thêm "đ" khi không đang xóa
+        if (input.value.endsWith('đ') || cursorPos <= formatted.length) {
+            input.value = formatted;
+        } else {
+            input.value = formatted + ' đ';
+        }
+    } else {
+        input.value = '';
     }
 }

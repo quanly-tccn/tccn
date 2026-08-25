@@ -302,12 +302,11 @@ body {
 }
 
 .page {
-    display: none;
+    display: none !important;
 }
 
 .page.active {
-    display: block;
-    animation: fadeIn 0.3s ease;
+    display: block !important;
 }
 
 @keyframes fadeIn {
@@ -868,24 +867,34 @@ body {
     align-items: center;
     padding: 15px 0;
     border-bottom: 1px solid var(--border-color);
+    gap: 15px;
+}
+
+.option-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .option-title {
     font-weight: 600;
     font-size: 0.95rem;
+    margin: 0;
+    color: var(--text-primary);
 }
 
 .option-desc {
     font-size: 0.85rem;
     color: var(--text-secondary);
+    margin: 5px 0 0 0;
 }
 
-/* Toggle Switch */
 .toggle-switch {
     position: relative;
     display: inline-block;
     width: 50px;
     height: 26px;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .toggle-switch input {
@@ -1272,4 +1281,221 @@ input[type="date"].form-input {
     .modal-content {
         width: 95%;
     }
+}
+
+/* ==================== DARK MODE ==================== */
+body.dark-mode {
+    --bg-color: #1a1a2e;
+    --card-bg: #16213e;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --border-color: #2d3748;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --primary-color: #60a5fa;
+    --primary-dark: #3b82f6;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    background-color: #1a1a2e;
+    color: #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .sidebar,
+body.dark-mode .top-header,
+body.dark-mode .card,
+body.dark-mode .chart-card,
+body.dark-mode .recent-transactions,
+body.dark-mode .budget-overview,
+body.dark-mode .budget-categories,
+body.dark-mode .goal-card,
+body.dark-mode .settings-section,
+body.dark-mode .modal-content {
+    background: #16213e;
+    border-color: #2d3748;
+}
+
+body.dark-mode .top-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+    border-bottom: 1px solid #2d3748;
+}
+
+body.dark-mode .header-title {
+    color: #e2e8f0;
+}
+
+body.dark-mode .transaction-item {
+    background: #1a1a2e;
+}
+
+body.dark-mode .transaction-item:hover {
+    background: #2d3748;
+}
+
+body.dark-mode .transaction-name {
+    color: #e2e8f0;
+}
+
+body.dark-mode .transaction-date {
+    color: #94a3b8;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .settings-input,
+body.dark-mode .filter-select,
+body.dark-mode .date-filter,
+body.dark-mode .search-box input {
+    background: #1a1a2e;
+    border-color: #2d3748;
+    color: #e2e8f0;
+}
+
+body.dark-mode .form-input:focus,
+body.dark-mode .settings-input:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+body.dark-mode .form-group label {
+    color: #94a3b8;
+}
+
+body.dark-mode .nav-item:hover {
+    background: #2d3748;
+    color: #e2e8f0;
+}
+
+body.dark-mode .nav-item.active {
+    background: #1e3a5f;
+    color: #60a5fa;
+}
+
+body.dark-mode .progress-bar {
+    background: #2d3748;
+}
+
+body.dark-mode .budget-item {
+    border-bottom-color: #2d3748;
+}
+
+body.dark-mode .result-count {
+    background: #1e3a5f;
+    color: #60a5fa;
+}
+
+body.dark-mode .highlight {
+    background: #78350f;
+    color: #fbbf24;
+}
+
+body.dark-mode .notification-btn {
+    background: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+}
+
+body.dark-mode .add-transaction-btn {
+    background: #60a5fa;
+    color: #1a1a2e;
+}
+
+body.dark-mode .add-transaction-btn:hover {
+    background: #3b82f6;
+}
+
+body.dark-mode .menu-toggle {
+    color: #e2e8f0;
+    background: #2d3748;
+    border-color: #4a5568;
+}
+
+body.dark-mode .type-btn {
+    border-color: #4a5568;
+    color: #94a3b8;
+}
+
+body.dark-mode .type-btn.active {
+    background: #1e3a5f;
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+
+body.dark-mode .modal-header {
+    border-bottom-color: #2d3748;
+}
+
+body.dark-mode .modal-footer {
+    border-top-color: #2d3748;
+}
+
+/* ==================== SMOOTH DARK MODE TRANSITION ==================== */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card,
+.sidebar,
+.top-header,
+.modal-content,
+.transaction-item,
+.budget-item,
+.chart-card,
+.settings-section {
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Goals */
+.add-goal-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.add-goal-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.update-progress-btn {
+    width: 100%;
+    padding: 10px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #2c5282;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    margin-top: 10px;
+}
+
+.update-progress-btn:hover {
+    background: #e0f2fe;
+}
+.goals-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.goals-header h3 {
+    font-size: 1.5rem;
+    color: #2c5282;
+    margin-bottom: 15px;
+}
+
+.goals-header .add-goal-btn {
+    display: inline-flex;
+    margin: 0 auto;
 }
