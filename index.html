@@ -10,6 +10,8 @@
     <!-- Chart.js for charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- App Container -->
@@ -283,7 +285,7 @@
                             <option value="quarter">Theo quý</option>
                             <option value="year">Theo năm</option>
                         </select>
-                        <button class="export-btn" onclick="alert('Xuất báo cáo PDF')">
+                        <button class="export-btn" onclick="openPDFReport()">
                             <i class="fas fa-download"></i> Xuất PDF
                         </button>
                     </div>
@@ -544,6 +546,80 @@
 
 <!-- Overlay -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+<!-- PDF Report Modal -->
+<div class="modal" id="pdf-report-modal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3>Xem trước báo cáo PDF</h3>
+            <button class="close-modal" onclick="closeModal('pdf-report-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div id="pdf-report-content" style="font-family: 'Be Vietnam Pro', sans-serif; padding: 20px;">
+                <!-- Header -->
+                <div style="text-align: center; padding: 20px; background: #2c5282; color: white; margin-bottom: 20px;">
+                    <h2 style="font-size: 22px; margin-bottom: 5px; color: white;">HỆ THỐNG QUẢN LÝ TÀI CHÍNH CÁ NHÂN</h2>
+                    <p style="font-size: 14px; color: #e2e8f0;">Báo cáo tháng <span id="pdf-month-label"></span></p>
+                </div>
+                
+                <!-- Summary Cards -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
+                    <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #bae6fd;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 5px;">SỐ DƯ HIỆN TẠI</p>
+                        <p style="font-size: 16px; font-weight: bold; color: #2c5282; margin: 0;" id="pdf-balance">0đ</p>
+                    </div>
+                    <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #a7f3d0;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 5px;">THU NHẬP THÁNG</p>
+                        <p style="font-size: 16px; font-weight: bold; color: #10b981; margin: 0;" id="pdf-income">0đ</p>
+                    </div>
+                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #fecaca;">
+                        <p style="font-size: 12px; color: #666; margin-bottom: 5px;">CHI TIÊU THÁNG</p>
+                        <p style="font-size: 16px; font-weight: bold; color: #ef4444; margin: 0;" id="pdf-expense">0đ</p>
+                    </div>
+                </div>
+                
+                <!-- Transactions Table -->
+                <h3 style="font-size: 16px; margin-bottom: 10px; color: #2c5282;">CHI TIẾT GIAO DỊCH</h3>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background: #f3f4f6;">
+                            <th style="padding: 8px; border: 1px solid #d1d5db; text-align: left;">Ngày</th>
+                            <th style="padding: 8px; border: 1px solid #d1d5db; text-align: left;">Danh mục</th>
+                            <th style="padding: 8px; border: 1px solid #d1d5db; text-align: left;">Ghi chú</th>
+                            <th style="padding: 8px; border: 1px solid #d1d5db; text-align: left;">Loại</th>
+                            <th style="padding: 8px; border: 1px solid #d1d5db; text-align: right;">Số tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pdf-transactions-body">
+                        <!-- JavaScript điền vào -->
+                    </tbody>
+                </table>
+                
+                <!-- Top 5 Expenses -->
+                <h3 style="font-size: 16px; margin-bottom: 10px; color: #2c5282;">TOP 5 KHOẢN CHI TIÊU LỚN NHẤT</h3>
+                <div id="pdf-top-expenses" style="margin-bottom: 30px;">
+                    <!-- JavaScript điền vào -->
+                </div>
+                
+                <!-- Footer -->
+                <div style="text-align: center; padding-top: 20px; border-top: 2px solid #e5e7eb; font-size: 11px; color: #666;">
+                    <p>Ngày xuất: <span id="pdf-date"></span></p>
+                    <p>Được tạo bởi: Bình Phùng </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal('pdf-report-modal')">Đóng</button>
+            <button class="save-btn" onclick="exportToPDF()">
+                <i class="fas fa-download"></i> Xuất PDF
+            </button>
+        </div>
+    </div>
+</div>
 
     <script src="app.js"></script>
 </body>

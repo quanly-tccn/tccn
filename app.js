@@ -1161,3 +1161,111 @@ function calculateComparison() {
     
     return { months, incomeData, expenseData };
 }
+
+// ==================== BÁO CÁO PDF ====================
+
+// Mở modal báo cáo PDF
+function openPDFReport() {
+    preparePDFReport();
+    openModal('pdf-report-modal');
+}
+
+// Chuẩn bị dữ liệu cho báo cáo
+function preparePDFReport() {
+    // Đảm bảo transactions là mới nhất
+    transactions = loadTransactions();
+    
+    const currentMonth = getCurrentMonth();
+    
+    // Cập nhật tiêu đề tháng
+    const now = new Date();
+    document.getElementById('pdf-month-label').textContent = 
+        `${now.getMonth() + 1}/${now.getFullYear()}`;
+    
+    // Cập nhật summary - Dùng đúng hàm tính toán
+    const balance = calculateBalance();
+    const monthlyIncome = calculateMonthlyIncome();
+    const monthlyExpense = calculateMonthlyExpense();
+    
+    console.log('PDF Balance:', balance);
+    console.log('PDF Income:', monthlyIncome);
+    console.log('PDF Expense:', monthlyExpense);
+    
+    document.getElementById('pdf-balance').textContent = formatCurrency(balance);
+    document.getElementById('pdf-income').textContent = formatCurrency(monthlyIncome);
+    document.getElementById('pdf-expense').textContent = formatCurrency(monthlyExpense);
+    
+    // Cập nhật ngày xuất
+    document.getElementById('pdf-date').textContent = 
+        now.toLocaleDateString('vi-VN');
+    
+    // Điền bảng giao dịch
+    const tbody = document.getElementById('pdf-transactions-body');
+    const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth))
+    .sort((a, b) => a.date.localeCompare(b.date));
+    
+    if (monthTransactions.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="padding: 15px; text-align: center; color: #666;">
+                    Không có giao dịch trong tháng này
+                </td>
+            </tr>
+        `;
+    } else {
+        tbody.innerHTML = monthTransactions.map(t => `
+            <tr>
+                <td style="padding: 8px; border: 1px solid #d1d5db;">${formatDate(t.date)}</td>
+                <td style="padding: 8px; border: 1px solid #d1d5db;">${t.icon} ${t.categoryName}</td>
+                <td style="padding: 8px; border: 1px solid #d1d5db;">${t.note}</td>
+                <td style="padding: 8px; border: 1px solid #d1d5db; color: ${t.type === 'income' ? '#10b981' : '#ef4444'}; font-weight: 500;">
+                    ${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'}
+                </td>
+                <td style="padding: 8px; border: 1px solid #d1d5db; text-align: right; font-weight: 600;">
+                    ${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    // Điền Top 5 chi tiêu
+    const topExpenses = transactions
+        .filter(t => t.type === 'expense')
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5);
+    
+    if (topExpenses.length === 0) {
+        document.getElementById('pdf-top-expenses').innerHTML = 
+            '<p style="text-align: center; color: #666;">Không có khoản chi tiêu nào</p>';
+    } else {
+        document.getElementById('pdf-top-expenses').innerHTML = topExpenses.map((t, index) => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                <span style="font-size: 13px;">${index + 1}. ${t.icon} ${t.categoryName} - ${t.note}</span>
+                <strong style="font-size: 13px; color: #ef4444;">${formatCurrency(t.amount)}</strong>
+            </div>
+        `).join('');
+    }
+}
+
+// Xuất PDF
+function exportToPDF() {
+    const element = document.getElementById('pdf-report-content');
+    
+    const options = {
+        margin: [10, 10, 10, 10],
+        filename: `bao-cao-tai-chinh-${getCurrentMonth()}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            logging: false
+        },
+        jsPDF: { 
+            unit: 'mm', 
+            format: 'a4', 
+            orientation: 'portrait' 
+        }
+    };
+    
+    html2pdf().set(options).from(element).save();
+}
