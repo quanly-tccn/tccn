@@ -328,6 +328,7 @@ function saveTransaction() {
     renderTransactions();
     updateDashboardStats(); // Cập nhật số liệu mới
     updateAllCharts();
+    renderBudgets();
     closeModal('transaction-modal');
     
     // Reset form
@@ -524,6 +525,7 @@ function deleteTransaction(id) {
         saveTransactions(); // Lưu vào LocalStorage
         renderTransactions();
         updateDashboardStats(); // Cập nhật số liệu mới
+        renderBudgets();
         updateAllCharts();
         showNotification('Đã xóa giao dịch!');
     }
@@ -897,6 +899,7 @@ function updateTransaction() {
     saveTransactions();
     renderTransactions();
     updateDashboardStats();
+    renderBudgets();
     updateAllCharts();
     closeModal('edit-transaction-modal');
     
@@ -1365,6 +1368,35 @@ function calculateSpentByCategory(category) {
         .reduce((sum, t) => sum + t.amount, 0);
 }
 
+// Thêm vào hàm renderBudgets
+function getBudgetStatus(percentage) {
+    if (percentage >= 100) {
+        return {
+            text: '🔴 Vượt ngân sách!',
+            class: 'danger',
+            suggestion: 'Hãy dừng chi tiêu cho danh mục này!'
+        };
+    } else if (percentage >= 80) {
+        return {
+            text: '🟡 Sắp vượt ngân sách!',
+            class: 'warning',
+            suggestion: 'Chỉ còn ' + (100 - percentage) + '% ngân sách!'
+        };
+    } else if (percentage >= 50) {
+        return {
+            text: '🟢 Đã dùng ' + percentage + '% ngân sách',
+            class: 'safe',
+            suggestion: 'Vẫn còn ' + (100 - percentage) + '% ngân sách!'
+        };
+    } else {
+        return {
+            text: '✅ An toàn',
+            class: 'safe',
+            suggestion: 'Bạn đang kiểm soát tốt!'
+        };
+    }
+}
+
 // Render danh sách ngân sách
 function renderBudgets() {
     const container = document.getElementById('budget-categories');
@@ -1390,19 +1422,10 @@ function renderBudgets() {
         totalBudget += budget.amount;
         totalSpent += spent;
         
-        // Xác định màu sắc dựa trên % chi tiêu
-        let progressClass = 'progress';
-        let statusText = '';
-        
-        if (percentage >= 100) {
-            progressClass += ' danger';
-            statusText = '⚠️ Vượt ngân sách!';
-        } else if (percentage >= 80) {
-            progressClass += ' warning';
-            statusText = '⚠️ Sắp vượt!';
-        } else {
-            statusText = '✅ An toàn';
-        }
+            // Lấy trạng thái ngân sách
+            const status = getBudgetStatus(percentage);
+            let progressClass = 'progress ' + status.class;
+            let statusText = status.text;
         
         return `
             <div class="budget-item">
@@ -1422,6 +1445,9 @@ function renderBudgets() {
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <p class="budget-percentage">${percentage}% - ${statusText}</p>
                 </div>
+                 <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+            💡      ${status.suggestion}
+                </p>
             </div>
         `;
     }).join('');
@@ -1444,6 +1470,8 @@ function renderBudgets() {
     document.getElementById('budget-month-label').textContent = 
     `${now.getMonth() + 1}/${now.getFullYear()}`;
 }
+
+
 
 // Format input ngân sách
 function setupBudgetInput() {
