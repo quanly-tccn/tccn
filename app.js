@@ -1,4 +1,4 @@
-// Danh mục cho từng loại giao dịch
+// ==================== CATEGORIES ====================
 const categories = {
     expense: [
         { value: 'food', label: '🍜 Ăn uống' },
@@ -20,15 +20,62 @@ const categories = {
         { value: 'other_income', label: '📦 Thu nhập khác' }
     ]
 };
+
+// ==================== STATE MANAGEMENT ====================
+const STORAGE_KEY = 'expense_tracker_transactions';
+
+// Khởi tạo state
+let transactions = loadTransactions();
+let currentPage = 'dashboard';
+let selectedType = 'expense';
+
 // Hàm cập nhật danh mục theo loại giao dịch
 function updateCategorySelect(type) {
-    const categorySelect = document.getElementById('category-select');
-    const categoriesList = categories[type] || categories.expense;
-    
-    categorySelect.innerHTML = categoriesList.map(cat => 
-        `<option value="${cat.value}">${cat.label}</option>`
-    ).join('');
+    try {
+        const categorySelect = document.getElementById('category-select');
+        
+        if (!categorySelect) {
+            console.warn('category-select chưa tồn tại, thử lại sau...');
+            return;
+        }
+        
+        const categoriesList = categories[type] || categories.expense;
+        
+        categorySelect.innerHTML = categoriesList.map(cat => 
+            `<option value="${cat.value}">${cat.label}</option>`
+        ).join('');
+    } catch (e) {
+        console.error('Lỗi updateCategorySelect:', e.message);
+    }
 }
+
+// ==================== FIREBASE ====================
+let firebaseDb = null;
+let database = null;
+
+function initFirebase() {
+    try {
+        const firebaseConfig = {
+            apiKey: "AIzaSyD9iUEkXxs7e6AUsomafKAx4znzfd6Gpm0",
+            authDomain: "expense-tracker-8bfcc.firebaseapp.com",
+            databaseURL: "https://expense-tracker-8bfcc-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "expense-tracker-8bfcc",
+            storageBucket: "expense-tracker-8bfcc.appspot.com",
+            messagingSenderId: "985194258261",
+            appId: "1:985194258261:web:942bd5354e8977bb86d9dc"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        firebaseDb = firebase.database();  // ← Đổi thành firebaseDb
+        database = firebaseDb;  // Giữ cả hai để tương thích
+        console.log('Firebase đã kết nối thành công!');
+        return true;
+    } catch (e) {
+        console.error('Lỗi khởi tạo Firebase:', e);
+        return false;
+    }
+}
+
 // Dữ liệu mẫu
 const sampleTransactions = [
     {
@@ -138,9 +185,6 @@ function getAmountValue() {
     return parseInt(amountInput.value.replace(/\./g, '')) || 0;
 }
 
-// ==================== STATE MANAGEMENT ====================
-const STORAGE_KEY = 'expense_tracker_transactions';
-
 // Hàm lấy dữ liệu từ LocalStorage
 function loadTransactions() {
     try {
@@ -163,11 +207,6 @@ function saveTransactions() {
     }
 }
 
-// Khởi tạo state
-let transactions = loadTransactions();
-let currentPage = 'dashboard';
-let selectedType = 'expense';
-
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
@@ -180,6 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAdvancedStatistics();
     initNotifications();
     updateNotificationBadge();
+    initPeriodSelector();
+    initFirebase();
+    updateCategorySelect('expense');  // Phải nằm TRONG DOMContentLoaded
     // Thêm event listener cho input số tiền
     const amountInput = document.getElementById('amount-input');
     if (amountInput) {
@@ -198,12 +240,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const id = parseInt(e.target.closest('.delete-btn').dataset.id);
             deleteTransaction(id);
         }
+        
     });
     renderBudgets();
     setupBudgetInput();
     initDarkMode();
-    renderGoals();
-    
+    renderGoals();  
 });
 
 // Navigation
@@ -350,6 +392,10 @@ function saveTransaction() {
     // 3. Kiểm tra cảnh báo ngân sách
     checkBudgetAlerts();
 
+ // Đồng bộ lên Supabase nếu có
+    if (supabase) {
+        syncToSupabase();
+    }
     closeModal('transaction-modal');
     
     // Reset form
@@ -1206,77 +1252,79 @@ function calculateComparison() {
 
 // Mở modal báo cáo PDF
 function openPDFReport() {
+    const activeBtn = document.querySelector('.period-btn.active');
+    if (activeBtn) {
+        currentPeriodType = activeBtn.dataset.period;
+    }
+    
+    // KHÔNG gọi updatePeriodFields() ở đây nữa
+    // Vì nó sẽ reset lựa chọn
+    
     preparePDFReport();
     openModal('pdf-report-modal');
 }
 
 // Chuẩn bị dữ liệu cho báo cáo
 function preparePDFReport() {
-    // Đảm bảo transactions là mới nhất
-    transactions = loadTransactions();
+    const period = getReportPeriod();
+     console.log('Period được chọn:', period); // Debug
+
+    // Lọc giao dịch theo period
+    const reportTransactions = transactions.filter(t => {
+        const tMonth = t.date.substring(0, 7);
+        return tMonth >= period.startDate && tMonth <= period.endDate;
+    });
     
-    const currentMonth = getCurrentMonth();
+    console.log('Số giao dịch lọc được:', reportTransactions.length); // Debug
     
-    // Cập nhật tiêu đề tháng
-    const now = new Date();
-    document.getElementById('pdf-month-label').textContent = 
-        `${now.getMonth() + 1}/${now.getFullYear()}`;
+    // Cập nhật tiêu đề
+    document.getElementById('pdf-month-label').textContent = period.label;
     
-    // Cập nhật summary - Dùng đúng hàm tính toán
-    const balance = calculateBalance();
-    const monthlyIncome = calculateMonthlyIncome();
-    const monthlyExpense = calculateMonthlyExpense();
+    // Tính toán summary
+    const totalIncome = reportTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
     
-    console.log('PDF Balance:', balance);
-    console.log('PDF Income:', monthlyIncome);
-    console.log('PDF Expense:', monthlyExpense);
+    const totalExpense = reportTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const balance = totalIncome - totalExpense;
     
     document.getElementById('pdf-balance').textContent = formatCurrency(balance);
-    document.getElementById('pdf-income').textContent = formatCurrency(monthlyIncome);
-    document.getElementById('pdf-expense').textContent = formatCurrency(monthlyExpense);
+    document.getElementById('pdf-income').textContent = formatCurrency(totalIncome);
+    document.getElementById('pdf-expense').textContent = formatCurrency(totalExpense);
     
     // Cập nhật ngày xuất
-    document.getElementById('pdf-date').textContent = 
-        now.toLocaleDateString('vi-VN');
+    document.getElementById('pdf-date').textContent = new Date().toLocaleDateString('vi-VN');
     
     // Điền bảng giao dịch
     const tbody = document.getElementById('pdf-transactions-body');
-    const monthTransactions = transactions.filter(t => t.date.startsWith(currentMonth))
-    .sort((a, b) => a.date.localeCompare(b.date));
     
-    if (monthTransactions.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="5" style="padding: 15px; text-align: center; color: #666;">
-                    Không có giao dịch trong tháng này
-                </td>
-            </tr>
-        `;
+    if (reportTransactions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding: 15px; text-align: center; color: #666;">Không có giao dịch trong ${period.label}</td></tr>`;
     } else {
-        tbody.innerHTML = monthTransactions.map(t => `
+        reportTransactions.sort((a, b) => a.date.localeCompare(b.date));
+        
+        tbody.innerHTML = reportTransactions.map(t => `
             <tr>
                 <td style="padding: 8px; border: 1px solid #d1d5db;">${formatDate(t.date)}</td>
                 <td style="padding: 8px; border: 1px solid #d1d5db;">${t.icon} ${t.categoryName}</td>
                 <td style="padding: 8px; border: 1px solid #d1d5db;">${t.note}</td>
-                <td style="padding: 8px; border: 1px solid #d1d5db; color: ${t.type === 'income' ? '#10b981' : '#ef4444'}; font-weight: 500;">
-                    ${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'}
-                </td>
-                <td style="padding: 8px; border: 1px solid #d1d5db; text-align: right; font-weight: 600;">
-                    ${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}
-                </td>
+                <td style="padding: 8px; border: 1px solid #d1d5db; color: ${t.type === 'income' ? '#10b981' : '#ef4444'}; font-weight: 500;">${t.type === 'income' ? 'Thu nhập' : 'Chi tiêu'}</td>
+                <td style="padding: 8px; border: 1px solid #d1d5db; text-align: right; font-weight: 600;">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</td>
             </tr>
         `).join('');
     }
     
-    // Điền Top 5 chi tiêu
-    const topExpenses = transactions
+    // Top 5 chi tiêu
+    const topExpenses = reportTransactions
         .filter(t => t.type === 'expense')
         .sort((a, b) => b.amount - a.amount)
         .slice(0, 5);
     
     if (topExpenses.length === 0) {
-        document.getElementById('pdf-top-expenses').innerHTML = 
-            '<p style="text-align: center; color: #666;">Không có khoản chi tiêu nào</p>';
+        document.getElementById('pdf-top-expenses').innerHTML = '<p style="text-align: center; color: #666;">Không có khoản chi tiêu nào</p>';
     } else {
         document.getElementById('pdf-top-expenses').innerHTML = topExpenses.map((t, index) => `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #e5e7eb;">
@@ -1286,7 +1334,6 @@ function preparePDFReport() {
         `).join('');
     }
 }
-
 // Xuất PDF
 function exportToPDF() {
     const element = document.getElementById('pdf-report-content');
@@ -2129,4 +2176,309 @@ function checkGoalAlerts() {
             addNotification(`💪 Mục tiêu "${goal.name}" đã đạt ${percentage}%!`, '💪');
         }
     });
+}
+
+// ==================== PERIOD SELECTOR ====================
+
+// Biến lưu loại báo cáo hiện tại
+let currentPeriodType = 'monthly';
+
+// Chọn loại báo cáo
+function selectPeriod(type) {
+    currentPeriodType = type;
+    console.log('Chọn period:', type); // Debug
+    
+    document.querySelectorAll('.period-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.period === type) {
+            btn.classList.add('active');
+        }
+    });
+    
+    updatePeriodFields();
+    localStorage.setItem('report_period_type', type); // Lưu lựa chọn
+}
+
+function getAvailableYears() {
+    const years = new Set();
+    
+    transactions.forEach(t => {
+        if (t.date) {
+            years.add(t.date.substring(0, 4));
+        }
+    });
+    
+    if (years.size === 0) {
+        years.add(String(new Date().getFullYear()));
+    }
+    
+    return Array.from(years).sort().reverse();
+}
+// Cập nhật fields theo loại
+function updatePeriodFields() {
+    const container = document.getElementById('period-fields');
+    if (!container) return;
+    
+    const years = [];
+    const currentYear = new Date().getFullYear();
+    
+    transactions.forEach(t => {
+        if (t.date) {
+            const year = t.date.substring(0, 4);
+            if (!years.includes(year)) years.push(year);
+        }
+    });
+    
+    if (years.length === 0) years.push(String(currentYear));
+    years.sort().reverse();
+    
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    
+    let html = '';
+    
+    if (currentPeriodType === 'monthly') {
+        html = `
+            <select id="report-month-select">
+                ${Array.from({length: 12}, (_, i) => i + 1).map(m => 
+                    `<option value="${m}">Tháng ${m}</option>`
+                ).join('')}
+            </select>
+            <select id="report-year-select-month">
+                ${years.map(y => `<option value="${y}">Năm ${y}</option>`).join('')}
+            </select>
+        `;
+    } else if (currentPeriodType === 'quarterly') {
+        html = `
+            <select id="report-quarter-select">
+                <option value="1">Quý 1 (T1-T3)</option>
+                <option value="2">Quý 2 (T4-T6)</option>
+                <option value="3">Quý 3 (T7-T9)</option>
+                <option value="4">Quý 4 (T10-T12)</option>
+            </select>
+            <select id="report-year-select-quarter">
+                ${years.map(y => `<option value="${y}">Năm ${y}</option>`).join('')}
+            </select>
+        `;
+    } else {
+        html = `
+            <select id="report-year-select">
+                ${years.map(y => `<option value="${y}">Năm ${y}</option>`).join('')}
+            </select>
+        `;
+    }
+    
+    container.innerHTML = html;
+    
+    // Đặt lại giá trị đã lưu (nếu có)
+    const savedMonth = localStorage.getItem('report_month');
+    const savedYear = localStorage.getItem('report_year');
+    const savedQuarter = localStorage.getItem('report_quarter');
+    
+    if (currentPeriodType === 'monthly' && savedMonth) {
+        document.getElementById('report-month-select').value = savedMonth;
+        if (savedYear) document.getElementById('report-year-select-month').value = savedYear;
+    }
+    if (currentPeriodType === 'quarterly' && savedQuarter) {
+        document.getElementById('report-quarter-select').value = savedQuarter;
+        if (savedYear) document.getElementById('report-year-select-quarter').value = savedYear;
+    }
+}
+
+// Thêm event listener khi select thay đổi
+document.addEventListener('change', function(e) {
+    if (e.target.id === 'report-month-select') {
+        localStorage.setItem('report_month', e.target.value);
+    }
+    if (e.target.id === 'report-year-select-month') {
+        localStorage.setItem('report_year', e.target.value);
+    }
+    if (e.target.id === 'report-quarter-select') {
+        localStorage.setItem('report_quarter', e.target.value);
+    }
+    if (e.target.id === 'report-year-select-quarter') {
+        localStorage.setItem('report_year', e.target.value);
+    }
+});
+
+// Lấy khoảng thời gian theo loại
+function getReportPeriod() {
+    // Đọc trực tiếp từ button active
+    const activeBtn = document.querySelector('.period-btn.active');
+    const type = activeBtn ? activeBtn.dataset.period : 'monthly';
+    
+    console.log('Period type từ DOM:', type); // Debug
+    
+    if (type === 'monthly') {
+        const monthSelect = document.getElementById('report-month-select');
+        const yearSelect = document.getElementById('report-year-select-month');
+        
+        if (monthSelect && yearSelect) {
+            const month = monthSelect.value;
+            const year = yearSelect.value;
+            const monthStr = `${year}-${String(month).padStart(2, '0')}`;
+            
+            console.log('Tháng đã chọn:', month, 'Năm:', year); // Debug
+            
+            return {
+                startDate: monthStr,
+                endDate: monthStr,
+                label: `Tháng ${month}/${year}`
+            };
+        }
+    } else if (type === 'quarterly') {
+        const quarterSelect = document.getElementById('report-quarter-select');
+        const yearSelect = document.getElementById('report-year-select-quarter');
+        
+        if (quarterSelect && yearSelect) {
+            const quarter = parseInt(quarterSelect.value);
+            const year = yearSelect.value;
+            const startMonth = (quarter - 1) * 3 + 1;
+            const endMonth = quarter * 3;
+            
+            console.log('Quý đã chọn:', quarter, 'Năm:', year); // Debug
+            
+            return {
+                startDate: `${year}-${String(startMonth).padStart(2, '0')}`,
+                endDate: `${year}-${String(endMonth).padStart(2, '0')}`,
+                label: `Quý ${quarter}/${year}`
+            };
+        }
+    } else {
+        const yearSelect = document.getElementById('report-year-select');
+        
+        if (yearSelect) {
+            const year = yearSelect.value;
+            
+            console.log('Năm đã chọn:', year); // Debug
+            
+            return {
+                startDate: `${year}-01`,
+                endDate: `${year}-12`,
+                label: `Năm ${year}`
+            };
+        }
+    }
+    
+    return { startDate: '', endDate: '', label: 'Không xác định' };
+}
+
+// Khởi tạo
+function initPeriodSelector() {
+    // Chỉ gọi khi load trang lần đầu
+    const savedPeriod = localStorage.getItem('report_period_type');
+    if (savedPeriod) {
+        selectPeriod(savedPeriod);
+    } else {
+        selectPeriod('monthly');
+    }
+}
+
+// ==================== FIREBASE SYNC ====================
+
+// Đẩy dữ liệu lên Firebase
+function syncToFirebase() {
+    const user = firebase.auth().currentUser;
+    
+    if (!user) {
+        showToast('Bạn cần đăng nhập Google!', 'error');
+        return;
+    }
+    
+    const userId = user.uid;
+    
+    firebaseDb.ref(`users/${userId}/transactions`).set(transactions)
+        .then(() => showToast('Đồng bộ thành công!', 'success'))
+        .catch(err => showToast('Lỗi: ' + err.message, 'error'));
+}
+
+// Tải dữ liệu từ Firebase
+async function syncFromFirebase() {
+    if (!firebaseDb) {
+        showToast('Firebase chưa được cấu hình!', 'error');
+        return;
+    }
+    
+    const user = firebase.auth().currentUser;
+    
+    if (!user) {
+        showToast('Bạn cần đăng nhập để tải dữ liệu!', 'error');
+        return;
+    }
+    
+    const userId = user.uid;
+    
+    try {
+        // Load transactions
+        const txSnapshot = await firebaseDb.ref(`users/${userId}/transactions`).once('value');
+        const txData = txSnapshot.val();
+        if (txData) {
+            transactions = txData;
+            saveTransactions();
+        }
+        
+        // Load budgets
+        const budgetSnapshot = await firebaseDb.ref(`users/${userId}/budgets`).once('value');
+        const budgetData = budgetSnapshot.val();
+        if (budgetData) {
+            budgets = budgetData;
+            saveBudgets();
+        }
+        
+        // Load goals
+        const goalSnapshot = await firebaseDb.ref(`users/${userId}/goals`).once('value');
+        const goalData = goalSnapshot.val();
+        if (goalData) {
+            goals = goalData;
+            saveGoals();
+        }
+        
+        renderTransactions();
+        renderBudgets();
+        renderGoals();
+        updateDashboardStats();
+        
+        showToast('Đã tải dữ liệu từ Firebase!', 'success');
+    } catch (e) {
+        console.error('Lỗi tải:', e);
+        showToast('Lỗi tải dữ liệu!', 'error');
+    }
+}
+
+// Đăng nhập Google
+function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    
+    firebase.auth().signInWithPopup(provider)
+        .then(result => {
+            const user = result.user;
+            console.log('Đã đăng nhập:', user.displayName, user.email);
+            showToast(`Chào mừng ${user.displayName}!`, 'success');
+            
+            // Cập nhật giao diện
+            updateUserUI(user);
+            
+            // Sync dữ liệu
+            syncFromFirebase();
+        })
+        .catch(error => {
+            console.error('Lỗi đăng nhập:', error);
+            showToast('Lỗi đăng nhập!', 'error');
+        });
+}
+
+// Cập nhật giao diện người dùng
+function updateUserUI(user) {
+    const userInfo = document.querySelector('.user-info');
+    if (userInfo && user) {
+        userInfo.innerHTML = `
+            <div class="avatar">
+                ${user.photoURL ? `<img src="${user.photoURL}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">` : user.displayName?.charAt(0) || 'U'}
+            </div>
+            <div>
+                <p class="user-name">${user.displayName || 'Người dùng'}</p>
+                <p class="user-email">${user.email}</p>
+            </div>
+        `;
+    }
 }
