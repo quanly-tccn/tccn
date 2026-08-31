@@ -8,7 +8,7 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js for charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -42,10 +42,6 @@
                     <i class="fas fa-chart-pie"></i>
                     <span>Ngân sách</span>
                 </li>
-                <li class="nav-item" data-page="statistics">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Thống kê</span>
-            </li>
                 <li class="nav-item" data-page="reports">
                     <i class="fas fa-chart-bar"></i>
                     <span>Báo cáo</span>
@@ -83,16 +79,55 @@
             <h1 class="header-title"><i class="fas fa-file-invoice-dollar"></i> Hệ thống quản lý tài chính cá nhân</h1>
         </div>
     </div>
+
     <div class="header-right">
-        <button class="notification-btn">
+    <button class="notification-btn" onclick="toggleNotifications()">
+        <i class="fas fa-bell"></i>
+        <span class="badge" id="notification-badge" style="display: none;">0</span>
+    </button>
+    
+    <button class="add-transaction-btn" onclick="openModal('transaction-modal')">
+        <i class="fas fa-plus"></i>
+        <span>Thêm giao dịch</span>
+    </button>
+</div>
+
+<!-- Notification Dropdown -->
+<div class="notification-dropdown" id="notification-dropdown">
+    <div class="notif-header">
+        <div class="notif-title">
             <i class="fas fa-bell"></i>
-            <span class="badge">3</span>
-        </button>
-        <button class="add-transaction-btn" onclick="openModal('transaction-modal')">
-            <i class="fas fa-plus"></i>
-            <span>Thêm giao dịch</span>
+            <h4>Thông báo</h4>
+            <span class="notif-count" id="notif-count-badge">0</span>
+        </div>
+        <button class="notif-close" onclick="toggleNotifications()">
+            <i class="fas fa-times"></i>
         </button>
     </div>
+    
+    <div class="notif-tabs">
+        <button class="notif-tab active" data-tab="all" onclick="switchNotifTab('all')">
+            Tất cả
+        </button>
+        <button class="notif-tab" data-tab="unread" onclick="switchNotifTab('unread')">
+            Chưa đọc
+        </button>
+    </div>
+    
+    <div class="notification-list" id="notification-list">
+        <!-- JavaScript sẽ điền vào -->
+    </div>
+    
+    <div class="notif-footer">
+        <button class="notif-footer-btn" onclick="markAllNotificationsRead()">
+            <i class="fas fa-check-double"></i> Đánh dấu đã đọc
+        </button>
+        <button class="notif-footer-btn danger" onclick="clearAllNotifications()">
+            <i class="fas fa-trash"></i> Xóa tất cả
+        </button>
+    </div>
+</div>
+
 </header>
             
             <!-- Page Content -->
@@ -242,7 +277,7 @@
 </div>
                 
                 <!-- Reports Page -->
-                <div class="page" id="reports-page">
+                            <div class="page" id="reports-page">
                     <div class="report-controls">
                         <select class="filter-select">
                             <option value="month">Theo tháng</option>
@@ -253,45 +288,45 @@
                             <i class="fas fa-download"></i> Xuất PDF
                         </button>
                     </div>
-                    <div class="chart-card">
-                            <h3>Top 5 khoản chi tiêu</h3>
-                            <div class="top-expenses">
-                                <div class="expense-item">
-                                    <span>1. Tiền nhà</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>2. Đi chợ</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>3. Xăng xe</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>4. Ăn ngoài</span>
-                                    <strong>0đ</strong>
-                                </div>
-                                <div class="expense-item">
-                                    <span>5. Cà phê</span>
-                                    <strong>0đ</strong>
-                                </div>
+                    
+                    <!-- So sánh tháng -->
+                    <div class="stats-row">
+                        <div class="stats-card">
+                            <h3>So sánh tháng này vs tháng trước</h3>
+                            <div class="comparison-grid" id="month-comparison">
+                                <!-- JavaScript sẽ điền vào -->
                             </div>
                         </div>
-                    <div class="chart-card large">
-                        <h3>So sánh thu nhập và chi tiêu</h3>
-                        <canvas id="comparisonChart"></canvas>
                     </div>
-
+                    
+                    <!-- Dự đoán chi tiêu -->
+                    <div class="stats-row">
+                        <div class="stats-card">
+                            <h3>Dự đoán chi tiêu tháng sau</h3>
+                            <div class="prediction-info" id="expense-prediction">
+                                <!-- JavaScript sẽ điền vào -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Biểu đồ -->
                     <div class="report-charts">
-                        <!--Xu hướng 6 tháng vào đây -->
-                    <div class="chart-card">
-                        <h3>Xu hướng 6 tháng</h3>
-                        <canvas id="trendChart"></canvas>
-                    </div>
+                        <div class="chart-card">
+                            <h3>Xu hướng 6 tháng</h3>
+                            <canvas id="trendChart"></canvas>
+                        </div>
                         
+                        <div class="chart-card large">
+                            <h3>So sánh thu nhập và chi tiêu</h3>
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
                         
-                        
+                        <div class="chart-card">
+                            <h3>Top 5 khoản chi tiêu</h3>
+                            <div class="top-expenses" id="top-expenses">
+                                <!-- JavaScript sẽ điền vào -->
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -643,7 +678,8 @@
         </div>
     </div>
 </div>
-
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
     <script src="app.js"></script>
 </body>
 </html>

@@ -177,8 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCategorySelect('expense');  // ← Thêm dòng này để khởi tạo danh mục mặc định
     setupAmountInput();
     updateDashboardStats(); // Cập nhật số liệu thống kê
-    
-
+    renderAdvancedStatistics();
+    initNotifications();
+    updateNotificationBadge();
     // Thêm event listener cho input số tiền
     const amountInput = document.getElementById('amount-input');
     if (amountInput) {
@@ -202,6 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupBudgetInput();
     initDarkMode();
     renderGoals();
+    
 });
 
 // Navigation
@@ -230,7 +232,6 @@ function switchPage(pageName) {
         page.classList.remove('active');
     });
     
-    // Kiểm tra xem page có tồn tại không
     const targetPage = document.getElementById(`${pageName}-page`);
     if (targetPage) {
         targetPage.classList.add('active');
@@ -254,10 +255,13 @@ function switchPage(pageName) {
         titleElement.textContent = pageTitles[pageName] || pageName;
     }
     
-    // Đóng sidebar trên mobile (quan trọng!)
+    // Đóng sidebar trên mobile - FIX
     if (window.innerWidth <= 768) {
         const sidebar = document.getElementById('sidebar');
-        sidebar.classList.remove('active');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        if (sidebar) sidebar.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
     }
 }
 
@@ -307,7 +311,7 @@ function saveTransaction() {
     const date = document.getElementById('date-input').value;
     
     if (!amount || !date) {
-        alert('Vui lòng nhập đầy đủ thông tin!');
+        showToast('Vui lòng nhập đầy đủ thông tin!', 'error')
         return;
     }
     
@@ -808,6 +812,7 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
 // ==================== EDIT TRANSACTION ====================
 let editingTransactionId = null;
 let editSelectedType = 'expense';
@@ -1279,13 +1284,16 @@ function exportToPDF() {
         html2canvas: { 
             scale: 2,
             useCORS: true,
-            logging: false
+            logging: false,
+            letterRendering: true,
+            allowTaint: true
         },
         jsPDF: { 
             unit: 'mm', 
             format: 'a4', 
             orientation: 'portrait' 
-        }
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
     
     html2pdf().set(options).from(element).save();
@@ -1719,3 +1727,364 @@ function handleGoalAmountInput(input) {
         input.value = '';
     }
 }
+
+// ==================== TOAST NOTIFICATIONS ====================
+
+// Hàm hiển thị toast notification
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    
+    if (!container) {
+        console.warn('Toast container không tồn tại');
+        return;
+    }
+    
+    // Tạo toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Chọn icon dựa trên type
+    let icon = '';
+    switch(type) {
+        case 'success':
+            icon = '✓';
+            break;
+        case 'error':
+            icon = '✕';
+            break;
+        case 'warning':
+            icon = '⚠';
+            break;
+        case 'info':
+            icon = 'ℹ';
+            break;
+    }
+    
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">
+            <p class="toast-message">${message}</p>
+        </div>
+    `;
+    
+    // Thêm vào container
+    container.appendChild(toast);
+    
+    // Tự động xóa sau 3 giây
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+// Cập nhật hàm showNotification cũ (nếu có)
+function showNotification(message, type = 'success') {
+    showToast(message, type);
+}
+
+// ==================== EMPTY STATES ====================
+
+// Hàm tạo empty state
+function createEmptyState({ icon, title, description, actionText, actionFunction }) {
+    return `
+        <div class="empty-state">
+            <div class="empty-state-icon">${icon}</div>
+            <h3 class="empty-state-title">${title}</h3>
+            <p class="empty-state-description">${description}</p>
+            ${actionText ? `
+                <button class="empty-state-action" onclick="${actionFunction}">
+                    <i class="fas fa-plus"></i> ${actionText}
+                </button>
+            ` : ''}
+        </div>
+    `;
+}
+
+// ==================== ADVANCED STATISTICS ====================
+
+// Lấy tháng trước
+function getLastMonth() {
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+}
+
+// Tính chi tiêu tháng trước
+function calculateLastMonthExpense() {
+    const lastMonth = getLastMonth();
+    return transactions
+        .filter(t => t.type === 'expense' && t.date.startsWith(lastMonth))
+        .reduce((sum, t) => sum + t.amount, 0);
+}
+
+// Tính thu nhập tháng trước
+function calculateLastMonthIncome() {
+    const lastMonth = getLastMonth();
+    return transactions
+        .filter(t => t.type === 'income' && t.date.startsWith(lastMonth))
+        .reduce((sum, t) => sum + t.amount, 0);
+}
+
+// So sánh tháng này vs tháng trước
+function compareMonths() {
+    const currentIncome = calculateMonthlyIncome();
+    const lastIncome = calculateLastMonthIncome();
+    const currentExpense = calculateMonthlyExpense();
+    const lastExpense = calculateLastMonthExpense();
+    
+    const incomeChange = lastIncome > 0 ? ((currentIncome - lastIncome) / lastIncome) * 100 : 0;
+    const expenseChange = lastExpense > 0 ? ((currentExpense - lastExpense) / lastExpense) * 100 : 0;
+    
+    return { currentIncome, lastIncome, incomeChange, currentExpense, lastExpense, expenseChange };
+}
+
+// Dự đoán chi tiêu tháng sau
+function predictNextMonthExpense() {
+    const currentMonth = getCurrentMonth();
+    const currentMonthExpenses = transactions
+        .filter(t => t.type === 'expense' && t.date.startsWith(currentMonth));
+    
+    if (currentMonthExpenses.length === 0) return 0;
+    
+    const now = new Date();
+    const currentDay = now.getDate();
+    const totalExpense = currentMonthExpenses.reduce((sum, t) => sum + t.amount, 0);
+    const avgDailyExpense = totalExpense / currentDay;
+    const predictedExpense = Math.round(avgDailyExpense * 30);
+    
+    return predictedExpense;
+}
+
+// Render thống kê nâng cao
+function renderAdvancedStatistics() {
+    // So sánh tháng
+    const comparison = compareMonths();
+    const comparisonContainer = document.getElementById('month-comparison');
+    if (comparisonContainer) {
+        comparisonContainer.innerHTML = `
+            <div class="comparison-item">
+                <p class="label">Thu nhập tháng này</p>
+                <p class="value text-success">${formatCurrency(comparison.currentIncome)}</p>
+                <p class="change ${comparison.incomeChange >= 0 ? 'positive' : 'negative'}">
+                    ${comparison.incomeChange >= 0 ? '+' : ''}${comparison.incomeChange.toFixed(1)}% so với tháng trước
+                </p>
+            </div>
+            <div class="comparison-item">
+                <p class="label">Chi tiêu tháng này</p>
+                <p class="value text-danger">${formatCurrency(comparison.currentExpense)}</p>
+                <p class="change ${comparison.expenseChange <= 0 ? 'positive' : 'negative'}">
+                    ${comparison.expenseChange >= 0 ? '+' : ''}${comparison.expenseChange.toFixed(1)}% so với tháng trước
+                </p>
+            </div>
+        `;
+    }
+    
+    // Dự đoán chi tiêu
+    const predicted = predictNextMonthExpense();
+    const predictionContainer = document.getElementById('expense-prediction');
+    if (predictionContainer) {
+        predictionContainer.innerHTML = `
+            <p class="prediction-note">Dựa trên chi tiêu trung bình của tháng này</p>
+            <p class="prediction-amount">${formatCurrency(predicted)}</p>
+            <p class="prediction-note">Dự kiến chi tiêu cho tháng sau</p>
+        `;
+    }
+    
+    // Top 5 khoản chi tiêu
+    renderTopExpenses();
+}
+
+// Render Top 5 khoản chi tiêu
+function renderTopExpenses() {
+    const container = document.getElementById('top-expenses');
+    if (!container) return;
+    
+    const topExpenses = transactions
+        .filter(t => t.type === 'expense')
+        .sort((a, b) => b.amount - a.amount)
+        .slice(0, 5);
+    
+    if (topExpenses.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #64748b;">Không có dữ liệu chi tiêu</p>';
+        return;
+    }
+    
+    container.innerHTML = topExpenses.map((t, index) => `
+        <div class="expense-item">
+            <span>${index + 1}. ${t.icon} ${t.categoryName} - ${t.note}</span>
+            <strong>${formatCurrency(t.amount)}</strong>
+        </div>
+    `).join('');
+}
+
+// ==================== NOTIFICATIONS ====================
+var NOTIFICATIONS_KEY = 'expense_tracker_notifications';
+
+var notifications = loadNotifications();
+
+function loadNotifications() {
+    try {
+        var saved = localStorage.getItem(NOTIFICATIONS_KEY);
+        if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+}
+
+function saveNotifications() {
+    try {
+        localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(notifications));
+    } catch (e) {}
+}
+
+function addNotification(message, icon) {
+    icon = icon || '🔔';
+    notifications.unshift({
+        id: Date.now(),
+        message: message,
+        icon: icon,
+        read: false,
+        time: new Date().toISOString()
+    });
+    
+    if (notifications.length > 20) notifications.pop();
+    
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+}
+
+function toggleNotifications() {
+    var dropdown = document.getElementById('notification-dropdown');
+    if (!dropdown) return;
+    
+    dropdown.classList.toggle('active');
+    
+    if (dropdown.classList.contains('active')) {
+        renderNotifications();
+    }
+}
+
+function updateNotificationBadge() {
+    var badge = document.getElementById('notification-badge');
+    var unreadCount = notifications.filter(function(n) { return !n.read; }).length;
+    
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'block' : 'none';
+    }
+}
+
+// Render notifications
+function renderNotifications() {
+    var list = document.getElementById('notification-list');
+    if (!list) return;
+    
+    // Lọc notifications theo tab
+    var filteredNotifications = notifications;
+    if (currentNotifTab === 'unread') {
+        filteredNotifications = notifications.filter(function(n) {
+            return !n.read;
+        });
+    }
+    
+    // Cập nhật badge count
+    var unreadCount = notifications.filter(function(n) { return !n.read; }).length;
+    var countBadge = document.getElementById('notif-count-badge');
+    if (countBadge) {
+        countBadge.textContent = unreadCount;
+        countBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+    }
+    
+    if (filteredNotifications.length === 0) {
+        list.innerHTML = '<div class="notif-empty">' +
+            '<i class="fas fa-bell-slash"></i>' +
+            '<p>' + (currentNotifTab === 'unread' ? 'Không có thông báo chưa đọc' : 'Không có thông báo nào') + '</p>' +
+            '</div>';
+        return;
+    }
+    
+    list.innerHTML = filteredNotifications.map(function(n) {
+        return '<div class="notification-item ' + (n.read ? '' : 'unread') + '" onclick="markNotificationRead(' + n.id + ')">' +
+            '<div class="notif-icon">' + n.icon + '</div>' +
+            '<div class="notif-content">' +
+            '<p class="notif-message">' + n.message + '</p>' +
+            '<span class="notif-time">' + formatTimeAgo(n.time) + '</span>' +
+            '</div>' +
+            (n.read ? '' : '<div class="notif-unread-dot"></div>') +
+            '</div>';
+    }).join('');
+}
+
+        // Chuyển tab thông báo
+    function switchNotifTab(tab) {
+        currentNotifTab = tab;
+            
+        // Cập nhật class active cho tabs
+        document.querySelectorAll('.notif-tab').forEach(function(btn) {
+            btn.classList.remove('active');
+            if (btn.dataset.tab === tab) {
+                btn.classList.add('active');
+            }
+        });
+            
+            // Render lại danh sách
+            renderNotifications();
+    }
+
+    function viewNotificationDetail(id) {
+        var notification = notifications.find(function(n) { return n.id === id; });
+        if (!notification) return;
+        
+        markNotificationRead(id);
+        alert(notification.message);
+    }
+
+function markNotificationRead(id) {
+    notifications = notifications.map(function(n) {
+        return n.id === id ? { ...n, read: true } : n;
+    });
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+}
+
+function markAllNotificationsRead() {
+    notifications = notifications.map(function(n) { return { ...n, read: true }; });
+    saveNotifications();
+    updateNotificationBadge();
+    renderNotifications();
+}
+
+function clearAllNotifications() {
+    if (confirm('Xóa tất cả thông báo?')) {
+        notifications = [];
+        saveNotifications();
+        updateNotificationBadge();
+        renderNotifications();
+    }
+}
+
+function formatTimeAgo(timeString) {
+    var now = new Date();
+    var time = new Date(timeString);
+    var diffMs = now - time;
+    var diffMin = Math.floor(diffMs / 60000);
+    var diffHour = Math.floor(diffMin / 60);
+    var diffDay = Math.floor(diffHour / 24);
+    
+    if (diffMin < 1) return 'Vừa xong';
+    if (diffMin < 60) return diffMin + ' phút trước';
+    if (diffHour < 24) return diffHour + ' giờ trước';
+    return diffDay + ' ngày trước';
+}
+
+function initNotifications() {
+    if (notifications.length === 0) {
+        addNotification('Chào mừng bạn đến với ứng dụng quản lý tài chính!', '👋');
+        addNotification('Hãy thêm giao dịch đầu tiên của bạn', '💰');
+    }
+}
+
+// Khởi tạo tab notifications
+var currentNotifTab = 'all';
