@@ -336,6 +336,20 @@ function saveTransaction() {
     updateDashboardStats(); // Cập nhật số liệu mới
     updateAllCharts();
     renderBudgets();
+    // 1. Thông báo thêm giao dịch
+    addNotification(
+        `Đã thêm ${selectedType === 'income' ? 'thu nhập' : 'chi tiêu'}: ${formatCurrency(amount)}`, 
+        selectedType === 'income' ? '💰' : '💸'
+    );
+    
+    // 2. Thông báo giao dịch lớn (> 5 triệu)
+    if (amount > 5000000) {
+        addNotification(`Giao dịch lớn: ${formatCurrency(amount)}!`, '💸');
+    }
+    
+    // 3. Kiểm tra cảnh báo ngân sách
+    checkBudgetAlerts();
+
     closeModal('transaction-modal');
     
     // Reset form
@@ -1658,6 +1672,7 @@ function updateGoalProgress(id) {
     saveGoals();
     renderGoals();
     updateDashboardStats();
+    checkGoalAlerts();
     showNotification('Đã cập nhật tiến độ!');
 }
 
@@ -2088,3 +2103,30 @@ function initNotifications() {
 
 // Khởi tạo tab notifications
 var currentNotifTab = 'all';
+
+// Kiểm tra cảnh báo ngân sách
+function checkBudgetAlerts() {
+    Object.entries(budgets).forEach(function([category, budget]) {
+        const spent = calculateSpentByCategory(category);
+        const percentage = budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
+        
+        if (percentage >= 100) {
+            addNotification(`🚨 Vượt ngân sách: ${budget.name} đã chi ${percentage}%!`, '🚨');
+        } else if (percentage >= 80) {
+            addNotification(`⚠️ Cảnh báo: ${budget.name} đã chi ${percentage}% ngân sách!`, '⚠️');
+        }
+    });
+}
+
+// Kiểm tra mục tiêu tiết kiệm
+function checkGoalAlerts() {
+    goals.forEach(function(goal) {
+        const percentage = goal.target > 0 ? Math.round((goal.current / goal.target) * 100) : 0;
+        
+        if (percentage >= 100) {
+            addNotification(`🎉 Chúc mừng! Bạn đã hoàn thành mục tiêu "${goal.name}"!`, '🎉');
+        } else if (percentage >= 50) {
+            addNotification(`💪 Mục tiêu "${goal.name}" đã đạt ${percentage}%!`, '💪');
+        }
+    });
+}
