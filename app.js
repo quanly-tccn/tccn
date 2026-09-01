@@ -406,7 +406,10 @@ function saveTransaction() {
     if (supabase) {
         syncToSupabase();
     }
-    closeModal('transaction-modal');
+    const modal = document.getElementById('transaction-modal');
+modal.classList.remove('active');
+modal.style.display = 'none';  // Force ẩn
+    //closeModal('transaction-modal');
     
     // Reset form
     document.getElementById('amount-input').value = '';
