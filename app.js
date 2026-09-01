@@ -326,9 +326,16 @@ function openModal(modalId) {
 }
 
 function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('active');
+    try {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('active');
+            console.log('Đã đóng modal:', modalId);
+        } else {
+            console.error('Không tìm thấy modal:', modalId);
+        }
+    } catch (e) {
+        console.error('Lỗi đóng modal:', e);
     }
 }
 
