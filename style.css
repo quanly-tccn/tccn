@@ -1020,7 +1020,13 @@ body {
     align-items: center;
     justify-content: center;
 }
-.modal.active { display: flex; }
+.modal {
+    display: none !important;
+}
+
+.modal.active {
+    display: flex !important;
+}
 
 .modal-content {
     background: var(--card-bg);
