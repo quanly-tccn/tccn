@@ -513,34 +513,65 @@ function calculateSavings() {
 
 // Cập nhật tất cả số liệu trên dashboard
 function updateDashboardStats() {
+
     // Cập nhật số dư
     const balance = calculateBalance();
-    document.querySelector('.balance-card .card-value').textContent = formatCurrency(balance);
+    const balanceValueEl = document.querySelector('.balance-card .card-value');
+    if (balanceValueEl) {
+        balanceValueEl.textContent = formatCurrency(balance);
+    
+    // Thêm màu sắc dựa trên giá trị
+    if (balance > 0) {
+        balanceValueEl.style.color = '#10b981';  // Xanh lá
+    } else if (balance < 0) {
+        balanceValueEl.style.color = '#ef4444';  // Đỏ
+    } else {
+        balanceValueEl.style.color = '#4a5568';  // Xám
+    }
+}
+    
+    // Cập nhật % thay đổi số dư
+    const balanceChange = calculateBalanceChange();
+    const balanceChangeEl = document.querySelector('.balance-card .card-change');
+    if (balanceChangeEl) {
+        if (balanceChange !== null) {
+            balanceChangeEl.textContent = 
+                `${balanceChange >= 0 ? '+' : ''}${balanceChange.toFixed(1)}% so với tháng trước`;
+            balanceChangeEl.className = `card-change ${balanceChange >= 0 ? 'positive' : 'negative'}`;
+        } else {
+            balanceChangeEl.textContent = 'Chưa có dữ liệu tháng trước';
+            balanceChangeEl.className = 'card-change';
+        }
+    }
     
     // Cập nhật thu nhập tháng
     const monthlyIncome = calculateMonthlyIncome();
     document.querySelector('.income-card .card-value').textContent = formatCurrency(monthlyIncome);
     
-    // Cập nhật chi tiêu tháng
-    const monthlyExpense = calculateMonthlyExpense();
-    document.querySelector('.expense-card .card-value').textContent = formatCurrency(monthlyExpense);
-    
-    // Cập nhật tiết kiệm
-    const totalSavings = calculateSavings();
-    document.querySelector('.savings-card .card-value').textContent = formatCurrency(totalSavings);
-    
-    // Cập nhật số lượng giao dịch
     const incomeCount = transactions.filter(t => 
         t.type === 'income' && t.date.startsWith(getCurrentMonth())
     ).length;
     document.querySelector('.income-card .card-change').textContent = `${incomeCount} giao dịch`;
     
-    const expenseCount = transactions.filter(t => 
-        t.type === 'expense' && t.date.startsWith(getCurrentMonth())
-    ).length;
-    document.querySelector('.expense-card .card-change').textContent = `${expenseCount} giao dịch`;
-
-     // Cập nhật tiết kiệm
+    // Cập nhật chi tiêu tháng
+    const monthlyExpense = calculateMonthlyExpense();
+    document.querySelector('.expense-card .card-value').textContent = formatCurrency(monthlyExpense);
+    
+    // Cập nhật % thay đổi chi tiêu
+    const expenseChange = calculateExpenseChange();
+    const expenseChangeEl = document.querySelector('.expense-card .card-change');
+    if (expenseChangeEl) {
+        if (expenseChange !== null) {
+            expenseChangeEl.textContent = 
+                `${expenseChange >= 0 ? '+' : ''}${expenseChange.toFixed(1)}% so với tháng trước`;
+            expenseChangeEl.className = `card-change ${expenseChange <= 0 ? 'positive' : 'negative'}`;
+        } else {
+            expenseChangeEl.textContent = 'Chưa có dữ liệu tháng trước';
+            expenseChangeEl.className = 'card-change';
+        }
+    }
+    
+    // Cập nhật tiết kiệm
     const savings = calculateSavings();
     document.querySelector('.savings-card .card-value').textContent = formatCurrency(savings);
     
@@ -549,10 +580,40 @@ function updateDashboardStats() {
     if (totalTarget > 0) {
         const percentage = Math.round((savings / totalTarget) * 100);
         document.querySelector('.savings-card .card-change').textContent = `Đạt ${percentage}% mục tiêu`;
+    } else {
+        document.querySelector('.savings-card .card-change').textContent = 'Chưa có mục tiêu';
     }
-    updateAllCharts();
 }
 
+// Tính % thay đổi số dư so với tháng trước
+function calculateBalanceChange() {
+    const currentBalance = calculateBalance();
+    const lastMonth = getLastMonth();
+    
+    const lastMonthIncome = transactions
+        .filter(t => t.type === 'income' && t.date.startsWith(lastMonth))
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const lastMonthExpense = transactions
+        .filter(t => t.type === 'expense' && t.date.startsWith(lastMonth))
+        .reduce((sum, t) => sum + t.amount, 0);
+    
+    const lastBalance = lastMonthIncome - lastMonthExpense;
+    
+    if (lastBalance === 0) return null;
+    
+    return ((currentBalance - lastBalance) / Math.abs(lastBalance)) * 100;
+}
+
+// Tính % thay đổi chi tiêu so với tháng trước
+function calculateExpenseChange() {
+    const currentExpense = calculateMonthlyExpense();
+    const lastExpense = calculateLastMonthExpense();
+    
+    if (lastExpense === 0) return null;
+    
+    return ((currentExpense - lastExpense) / lastExpense) * 100;
+}
 
 function renderTransactions() {
     const recentContainer = document.getElementById('recent-transactions');
