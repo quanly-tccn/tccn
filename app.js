@@ -226,6 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (firebaseDb) {
         initAuthStateListener();
     }
+    // Load trạng thái auto sync
+    autoSyncEnabled = loadAutoSyncSetting();
+    const toggle = document.getElementById('auto-sync-toggle');
+    if (toggle) {
+        toggle.checked = autoSyncEnabled;
+    }
 
     // Thêm event listener cho input số tiền
     const amountInput = document.getElementById('amount-input');
@@ -395,31 +401,28 @@ function saveTransaction() {
     updateDashboardStats(); // Cập nhật số liệu mới
     updateAllCharts();
     renderBudgets();
-    // 1. Thông báo thêm giao dịch
-    addNotification(
-        `Đã thêm ${selectedType === 'income' ? 'thu nhập' : 'chi tiêu'}: ${formatCurrency(amount)}`, 
-        selectedType === 'income' ? '💰' : '💸'
-    );
-    
-    // 2. Thông báo giao dịch lớn (> 5 triệu)
-    if (amount > 5000000) {
-        addNotification(`Giao dịch lớn: ${formatCurrency(amount)}!`, '💸');
-    }
-    
+       
     // 3. Kiểm tra cảnh báo ngân sách
     checkBudgetAlerts();
 
-    const modal = document.getElementById('transaction-modal');
-modal.classList.remove('active');
-modal.style.display = 'none';  // Force ẩn
-    //closeModal('transaction-modal');
+    // Sync Firebase
+    if (firebaseDb) {
+            syncToFirebase();
+        }
+
+    // Tự động sync nếu bật
+    if (autoSyncEnabled && firebaseDb) {
+        syncToFirebase();
+    }
+    closeModal('transaction-modal');
     
     // Reset form
     document.getElementById('amount-input').value = '';
     document.getElementById('note-input').value = '';
     setDefaultDate();
     selectType('expense');  // Reset về mặc định là chi tiêu
-    
+    updateCategorySelect('expense');
+
     // Hiển thị thông báo thành công
     showNotification('Đã thêm giao dịch thành công!');
 }
@@ -682,8 +685,12 @@ function deleteTransaction(id) {
         saveTransactions(); // Lưu vào LocalStorage
         renderTransactions();
         updateDashboardStats(); // Cập nhật số liệu mới
-        renderBudgets();
         updateAllCharts();
+        renderBudgets();
+         // Tự động sync nếu bật
+        if (autoSyncEnabled && firebaseDb) {
+            syncToFirebase();
+        }
         showNotification('Đã xóa giao dịch!');
     }
 }
@@ -1057,10 +1064,13 @@ function updateTransaction() {
     saveTransactions();
     renderTransactions();
     updateDashboardStats();
-    renderBudgets();
     updateAllCharts();
+    renderBudgets();
+     // Tự động sync nếu bật
+    if (autoSyncEnabled && firebaseDb) {
+        syncToFirebase();
+    }
     closeModal('edit-transaction-modal');
-    
     showNotification('Đã cập nhật giao dịch!');
 }
 
@@ -1502,8 +1512,10 @@ function saveBudget() {
     
     saveBudgets();
     renderBudgets();
+    if (autoSyncEnabled && firebaseDb) {
+        syncToFirebase();
+    }
     closeModal('budget-modal');
-    
     showNotification('Đã lưu ngân sách!');
 }
 
@@ -1766,9 +1778,11 @@ function saveGoal() {
     goals.push(newGoal);
     saveGoals();
     renderGoals();
+    if (autoSyncEnabled && firebaseDb) {
+        syncToFirebase();
+    }
     closeModal('goal-modal');
     updateDashboardStats();
-    
     showNotification('Đã thêm mục tiêu tiết kiệm!');
 }
 
@@ -2547,14 +2561,12 @@ function loginWithGoogle() {
 function initAuthStateListener() {
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
-            // Người dùng đã đăng nhập
             console.log('Đã đăng nhập:', user.displayName);
             updateUserUI(user);
             
-            // Tự động sync dữ liệu
-            syncFromFirebase();
+            // KHÔNG tự động sync nữa
+            // syncFromFirebase();  ← XÓA HOẶC COMMENT DÒNG NÀY
             
-            // Lưu thông tin user vào localStorage
             localStorage.setItem('loggedInUser', JSON.stringify({
                 uid: user.uid,
                 displayName: user.displayName,
@@ -2562,7 +2574,6 @@ function initAuthStateListener() {
                 photoURL: user.photoURL
             }));
         } else {
-            // Người dùng chưa đăng nhập
             console.log('Chưa đăng nhập');
             localStorage.removeItem('loggedInUser');
         }
@@ -2629,5 +2640,37 @@ function updateUserUI(user) {
             <span>${user.displayName || user.email}</span>
         `;
         googleBtn.onclick = logout;
+    }
+}
+
+// State cho đồng bộ tự động
+let autoSyncEnabled = false;
+
+// Load trạng thái từ LocalStorage
+function loadAutoSyncSetting() {
+    try {
+        const saved = localStorage.getItem('auto_sync_enabled');
+        return saved === 'true';
+    } catch (e) {
+        return false;
+    }
+}
+
+// Save trạng thái
+function saveAutoSyncSetting(enabled) {
+    localStorage.setItem('auto_sync_enabled', enabled);
+}
+
+// Toggle đồng bộ tự động
+function toggleAutoSync() {
+    autoSyncEnabled = document.getElementById('auto-sync-toggle').checked;
+    saveAutoSyncSetting(autoSyncEnabled);
+    
+    if (autoSyncEnabled) {
+        showToast('Đã bật đồng bộ tự động!', 'success');
+        // Sync ngay khi bật
+        syncToFirebase();
+    } else {
+        showToast('Đã tắt đồng bộ tự động!', 'info');
     }
 }
