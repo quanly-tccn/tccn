@@ -381,8 +381,10 @@ function saveTransaction() {
     }
     
     // Tìm thông tin danh mục dựa trên selectedType và category value
-    const categoriesList = categories[selectedType] || categories.expense;
-    const selectedCategory = categoriesList.find(cat => cat.value === category);
+    const defaultCategories = categories[selectedType] || categories.expense;
+    const customCats = customCategories[selectedType] || [];
+    const allCategories = [...defaultCategories, ...customCats];
+    const selectedCategory = allCategories.find(cat => cat.value === category);
     
     const newTransaction = {
         id: Date.now(),
@@ -2673,4 +2675,99 @@ function toggleAutoSync() {
     } else {
         showToast('Đã tắt đồng bộ tự động!', 'info');
     }
+}
+// ==================== CUSTOM CATEGORIES ====================
+const CUSTOM_CATEGORIES_KEY = 'expense_tracker_custom_categories';
+
+function loadCustomCategories() {
+    try {
+        const saved = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+        if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return { expense: [], income: [] };
+}
+
+function saveCustomCategories() {
+    try {
+        localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(customCategories));
+    } catch (e) {}
+}
+
+let customCategories = loadCustomCategories();
+let selectedIcon = '📦';
+
+function openAddCategoryModal() {
+    document.getElementById('new-category-type').value = selectedType;
+    document.getElementById('new-category-name').value = '';
+    document.getElementById('new-category-icon').value = '📦';
+    selectedIcon = '📦';
+    
+    document.querySelectorAll('.icon-option').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    openModal('add-category-modal');
+}
+
+function selectIcon(icon) {
+    selectedIcon = icon;
+    document.getElementById('new-category-icon').value = icon;
+    
+    document.querySelectorAll('.icon-option').forEach(el => {
+        el.classList.remove('selected');
+        if (el.textContent.trim() === icon) {
+            el.classList.add('selected');
+        }
+    });
+}
+
+function saveNewCategory() {
+    const type = document.getElementById('new-category-type').value;
+    const name = document.getElementById('new-category-name').value.trim();
+    const icon = document.getElementById('new-category-icon').value;
+    
+    if (!name) {
+        showToast('Vui lòng nhập tên danh mục!', 'error');
+        return;
+    }
+    
+    const value = 'custom_' + Date.now();
+    
+    customCategories[type].push({
+        value: value,
+        label: `${icon} ${name}`
+    });
+    
+    saveCustomCategories();
+    updateCategorySelect(selectedType);
+    
+    closeModal('add-category-modal');
+    showToast('Đã thêm danh mục mới!', 'success');
+    
+    setTimeout(() => {
+        const select = document.getElementById('category-select');
+        if (select) select.value = value;
+    }, 100);
+    
+    if (autoSyncEnabled && firebaseDb) {
+        syncToFirebase();
+    }
+}
+
+// Cập nhật updateCategorySelect để bao gồm danh mục tùy chỉnh
+function updateCategorySelect(type) {
+    const categorySelect = document.getElementById('category-select');
+    
+    if (!categorySelect) {
+        console.warn('Không tìm thấy category-select');
+        return;
+    }
+    
+    const defaultCategories = categories[type] || categories.expense;
+    const customCats = customCategories[type] || [];
+    const allCategories = [...defaultCategories, ...customCats];
+    
+    categorySelect.innerHTML = allCategories.map(cat => 
+        `<option value="${cat.value}">${cat.label}</option>`
+    ).join('');
 }

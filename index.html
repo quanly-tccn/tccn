@@ -478,10 +478,13 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>Danh mục</label>
-                    <select class="form-input" id="category-select">
-                     <!-- Danh mục sẽ được JavaScript tự động cập nhật -->
-                    </select>
+                <label>Danh mục</label>
+                <select class="form-input" id="category-select">
+                <!-- Danh mục sẽ được JavaScript tự động cập nhật -->
+                </select>
+                <button type="button" class="add-category-btn" onclick="openAddCategoryModal()">
+                    <i class="fas fa-plus"></i> Thêm danh mục mới
+                </button>
                 </div>
                 
                 <div class="form-group">
@@ -716,6 +719,68 @@
         <div class="modal-footer">
             <button class="cancel-btn" onclick="closeModal('goal-modal')">Hủy</button>
             <button class="save-btn" onclick="saveGoal()">Lưu mục tiêu</button>
+        </div>
+    </div>
+</div>
+<!-- Add Category Modal -->
+<div class="modal" id="add-category-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Thêm danh mục mới</h3>
+            <button class="close-modal" onclick="closeModal('add-category-modal')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Loại danh mục</label>
+                <select class="form-input" id="new-category-type">
+                    <option value="expense">Chi tiêu</option>
+                    <option value="income">Thu nhập</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Tên danh mục</label>
+                <input type="text" class="form-input" placeholder="VD: Thú cưng" id="new-category-name">
+            </div>
+            
+            <div class="form-group">
+                <label>Icon</label>
+                <div class="icon-picker" id="icon-picker">
+                    <span class="icon-option" onclick="selectIcon('🐕')">🐕</span>
+                    <span class="icon-option" onclick="selectIcon('🐈')">🐈</span>
+                    <span class="icon-option" onclick="selectIcon('🎮')">🎮</span>
+                    <span class="icon-option" onclick="selectIcon('💄')">💄</span>
+                    <span class="icon-option" onclick="selectIcon('👶')">👶</span>
+                    <span class="icon-option" onclick="selectIcon('🎁')">🎁</span>
+                    <span class="icon-option" onclick="selectIcon('☕')">☕</span>
+                    <span class="icon-option" onclick="selectIcon('🍺')">🍺</span>
+                    <span class="icon-option" onclick="selectIcon('✈️')">✈️</span>
+                    <span class="icon-option" onclick="selectIcon('🏠')">🏠</span>
+                    <span class="icon-option" onclick="selectIcon('💊')">💊</span>
+                    <span class="icon-option" onclick="selectIcon('📱')">📱</span>
+                    <span class="icon-option" onclick="selectIcon('💻')">💻</span>
+                    <span class="icon-option" onclick="selectIcon('📚')">📚</span>
+                    <span class="icon-option" onclick="selectIcon('🚗')">🚗</span>
+                    <span class="icon-option" onclick="selectIcon('💼')">💼</span>
+                    <span class="icon-option" onclick="selectIcon('🎵')">🎵</span>
+                    <span class="icon-option" onclick="selectIcon('⚽')">⚽</span>
+                    <span class="icon-option" onclick="selectIcon('🎨')">🎨</span>
+                    <span class="icon-option" onclick="selectIcon('🌸')">🌸</span>
+                    <span class="icon-option" onclick="selectIcon('💎')">💎</span>
+                    <span class="icon-option" onclick="selectIcon('🔧')">🔧</span>
+                    <span class="icon-option" onclick="selectIcon('📷')">📷</span>
+                    <span class="icon-option" onclick="selectIcon('🍕')">🍕</span>
+                </div>
+                <input type="hidden" id="new-category-icon" value="📦">
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="cancel-btn" onclick="closeModal('add-category-modal')">Hủy</button>
+            <button class="save-btn" onclick="saveNewCategory()">Lưu danh mục</button>
         </div>
     </div>
 </div>

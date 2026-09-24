@@ -2013,3 +2013,102 @@ body.dark-mode .sync-note {
         padding: 10px 15px;
     }
 }
+/* Add Category Button */
+.add-category-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: #eff6ff;
+    color: #3b82f6;
+    border: 1px dashed #3b82f6;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.add-category-btn:hover {
+    background: #dbeafe;
+    border-style: solid;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+/* Icon Picker */
+.icon-picker {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.icon-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.icon-option:hover {
+    background: white;
+    border-color: #3b82f6;
+    transform: scale(1.1);
+}
+
+.icon-option.selected {
+    background: #dbeafe;
+    border-color: #3b82f6;
+    transform: scale(1.05);
+}
+
+/* Dark mode */
+body.dark-mode .add-category-btn {
+    background: #1e3a5f;
+    color: #60a5fa;
+    border-color: #60a5fa;
+}
+
+body.dark-mode .add-category-btn:hover {
+    background: #2d4a6f;
+}
+
+body.dark-mode .icon-picker {
+    background: #1a1a2e;
+}
+
+body.dark-mode .icon-option:hover {
+    background: #2d3748;
+}
+
+body.dark-mode .icon-option.selected {
+    background: #1e3a5f;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .icon-picker {
+        grid-template-columns: repeat(6, 1fr);
+    }
+    
+    .icon-option {
+        width: 35px;
+        height: 35px;
+        font-size: 1.1rem;
+    }
+}
