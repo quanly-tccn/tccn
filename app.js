@@ -25,7 +25,8 @@ const categories = {
 const STORAGE_KEY = 'expense_tracker_transactions';
 
 // Khởi tạo state
-let transactions = loadTransactions();
+// Khởi tạo state - Delay loading
+let transactions = [];
 let currentPage = 'dashboard';
 let selectedType = 'expense';
 
@@ -209,6 +210,7 @@ function saveTransactions() {
 
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', () => {
+    transactions = loadTransactions();
     initNavigation();
     initCharts();
     renderTransactions();
