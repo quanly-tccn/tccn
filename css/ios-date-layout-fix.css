@@ -1,0 +1,125 @@
+/* Finance Manager — iPhone / iOS WebKit native date & month layout fix.
+   Applies only at mobile widths; does not modify any financial logic. */
+@media (max-width: 768px) {
+  /* Native date/month inputs have an intrinsic content width in iOS WebKit.
+     A 100% width without shrinking the surrounding grid/flex item is insufficient. */
+  input[type="date"],
+  input[type="month"],
+  input[type="datetime-local"] {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 16px !important;
+    line-height: normal;
+    min-height: 46px;
+    padding: 9px 10px !important;
+    text-align: left;
+  }
+  input[type="date"]::-webkit-date-and-time-value,
+  input[type="month"]::-webkit-date-and-time-value,
+  input[type="datetime-local"]::-webkit-date-and-time-value {
+    min-width: 0;
+    max-width: 100%;
+    text-align: left;
+  }
+  input[type="date"]::-webkit-datetime-edit,
+  input[type="month"]::-webkit-datetime-edit,
+  input[type="datetime-local"]::-webkit-datetime-edit {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* 1. Search: both date pickers need full width, not half-width iOS columns. */
+  .fm-search-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fm-search-fields > .fm-search-field {
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+  .fm-search-fields > .fm-search-field:has(> input[type="date"]) {
+    grid-column: 1 / -1;
+  }
+  /* Fallback for older WebKit without :has(). The last two generated fields
+     in transaction-search.js are precisely 'Từ ngày' and 'Đến ngày'. */
+  .fm-search-fields > .fm-search-field:nth-last-child(-n+2) {
+    grid-column: 1 / -1;
+  }
+
+  /* 2. Statistics: allow native month/date control a complete row. */
+  .fm-stats-filters,
+  .fm-stats-custom-fields {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 10px;
+  }
+  .fm-stats-field,
+  .fm-stats-custom-fields > .fm-stats-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100%;
+  }
+  .fm-stats-field > input,
+  .fm-stats-field > select,
+  #stats-month,
+  #stats-from,
+  #stats-to {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* 3. PDF report controls are inserted by report.js at runtime. */
+  #finance-pdf-export .fm-report-form,
+  #finance-pdf-export .fm-report-custom {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    gap: 10px;
+  }
+  #finance-pdf-export .fm-report-field {
+    min-width: 0 !important;
+    width: 100%;
+    max-width: 100%;
+  }
+  #finance-pdf-export .fm-report-field > input,
+  #finance-pdf-export .fm-report-field > select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  #finance-pdf-export .fm-report-form > button[type="submit"] {
+    width: 100%;
+  }
+
+  /* 4. Budget month chooser: prevent intrinsic native control from stretching. */
+  .fm-budget-toolbar,
+  .fm-budget-toolbar > label {
+    min-width: 0 !important;
+    max-width: 100%;
+  }
+  .fm-budget-toolbar > label {
+    width: 100% !important;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #fm-budget-month { width: 100% !important; }
+
+  /* 5. Transaction date input, already full width inline in index.html. */
+  #transaction-form #tx-date {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
