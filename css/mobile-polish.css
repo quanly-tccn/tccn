@@ -481,3 +481,61 @@
   }
 
 }
+
+/* =========================================
+   FINANCE MANAGER
+   FIX DATE / MONTH INPUT OVERFLOW ON iOS
+   ========================================= */
+
+/* Giữ kích thước phần tử trong khung chứa */
+input[type="date"],
+input[type="month"],
+input[type="datetime-local"] {
+    display: block;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    font-size: 16px !important;
+}
+
+/* Giảm nguy cơ tràn trong Flex và Grid */
+@media screen and (max-width: 768px) {
+
+    input[type="date"],
+    input[type="month"],
+    input[type="datetime-local"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+
+        font-size: 16px !important;
+        line-height: normal;
+
+        padding: 10px 8px !important;
+        border-radius: 10px;
+    }
+
+    /* Các phần tử trực tiếp trong bố cục Grid */
+    .grid > *,
+    [class*="filter-grid"] > *,
+    [class*="date-grid"] > * {
+        min-width: 0;
+    }
+
+    /* Khắc phục vùng ngày giờ bên trong WebKit */
+    input[type="date"]::-webkit-date-and-time-value,
+    input[type="month"]::-webkit-date-and-time-value,
+    input[type="datetime-local"]::-webkit-date-and-time-value {
+        min-width: 0;
+        text-align: center;
+    }
+
+    /* Không cho nội dung nội bộ ép rộng khung */
+    input[type="date"]::-webkit-datetime-edit,
+    input[type="month"]::-webkit-datetime-edit,
+    input[type="datetime-local"]::-webkit-datetime-edit {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
