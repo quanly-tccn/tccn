@@ -460,3 +460,24 @@
     order: 2;
   }
 }
+
+/* ==========================================
+   FINANCE MANAGER
+   FIX AUTO ZOOM KHI NHẬP LIỆU MOBILE
+   ========================================== */
+
+@media screen and (max-width: 768px) {
+
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    font-size: 16px !important;
+  }
+
+}
