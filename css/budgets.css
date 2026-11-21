@@ -1,0 +1,33 @@
+/* Finance Manager 1.2 - ngân sách theo tháng */
+.fm-budget-panel { margin: 18px 0 22px; padding: 20px; }
+.fm-budget-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.fm-budget-heading h2 { font-size:20px; margin:0; color:#0f172a; }
+.fm-budget-heading p,.fm-budget-period { color:#64748b; font-size:13px; margin:5px 0 12px; }
+.fm-budget-primary { background:#2563eb; color:white; border:1px solid #2563eb; border-radius:10px; font:600 13px/1.4 inherit; padding:10px 14px; cursor:pointer; }
+.fm-budget-primary:hover { background:#1d4ed8; }
+.fm-budget-primary:disabled { opacity:.6; cursor:wait; }
+.fm-budget-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.fm-budget-row { border:1px solid #e2e8f0; background:#fff; border-radius:14px; padding:14px; min-width:0; }
+.fm-budget-row-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.fm-budget-row-heading strong { font-size:15px; overflow-wrap:anywhere; }
+.fm-budget-actions { display:flex; gap:6px; flex-shrink:0; }
+.fm-budget-actions button,.fm-budget-secondary { background:#f8fafc; border:1px solid #e2e8f0; border-radius:9px; padding:7px 10px; color:#475569; cursor:pointer; font-size:12px; font-weight:600; }
+.fm-budget-actions button:last-child { color:#dc2626; background:#fff1f2; border-color:#ffe4e6; }
+.fm-budget-values { color:#334155; font-size:13px; font-weight:600; margin:10px 0 8px; font-variant-numeric:tabular-nums; }
+.fm-budget-track { height:9px; border-radius:999px; overflow:hidden; background:#e2e8f0; }
+.fm-budget-fill { height:100%; background:#22c55e; border-radius:999px; transition:width .2s; }
+.fm-budget-row.near .fm-budget-fill { background:#f59e0b; }
+.fm-budget-row.over .fm-budget-fill { background:#ef4444; }
+.fm-budget-row-footer { display:flex; justify-content:space-between; gap:8px; margin-top:8px; font-size:12px; color:#64748b; }
+.fm-budget-row.over .fm-budget-row-footer { color:#dc2626; }
+.fm-budget-row.near .fm-budget-row-footer { color:#b45309; }
+.fm-budget-empty { grid-column:1/-1; padding:26px 12px; color:#64748b; text-align:center; background:#f8fafc; border-radius:12px; }
+.fm-budget-editor { margin-top:18px; border:1px solid #dbeafe; background:#f8fbff; border-radius:14px; padding:17px; }
+.fm-budget-editor[hidden] { display:none !important; }
+.fm-budget-editor form { display:grid; gap:9px; max-width:460px; }
+.fm-budget-editor h3 { font-size:17px; margin:0; }
+.fm-budget-editor label { font-weight:600; font-size:13px; margin-top:4px; }
+.fm-budget-editor input,.fm-budget-editor select { display:block; width:100%; box-sizing:border-box; min-height:42px; border:1px solid #cbd5e1; border-radius:9px; background:#fff; padding:10px 12px; font:inherit; }
+.fm-budget-form-actions { display:flex; justify-content:flex-end; gap:9px; margin-top:8px; }
+@media(max-width:650px) { .fm-budget-panel { padding:15px; } .fm-budget-list { grid-template-columns:1fr; } .fm-budget-heading h2 {font-size:18px;} }
+@media(prefers-reduced-motion:reduce) { .fm-budget-fill { transition:none; } }

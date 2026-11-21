@@ -1,0 +1,8 @@
+/* Bổ sung kiểu nhỏ gọn cho phần quản lý danh mục */
+.category-item {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:11px 0;border-bottom:1px solid #e2e8f0}
+.category-actions {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.category-actions button,.category-neutral {font:inherit;font-size:13px;font-weight:600;min-height:38px;padding:8px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;color:#334155;cursor:pointer}
+.category-actions button:first-child {color:#2563eb;background:#eff6ff;border-color:#dbeafe}
+.category-actions button:last-child {color:#be123c;background:#fff1f2;border-color:#ffe4e6}
+.category-actions button:hover,.category-neutral:hover {filter:brightness(.96)}
+.category-actions button:focus-visible,.category-neutral:focus-visible {outline:2px solid #2563eb;outline-offset:2px}
