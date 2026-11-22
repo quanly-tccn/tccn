@@ -1,0 +1,72 @@
+/* Finance Manager 1.2 - Badge canh bao trong tab Ngan sach */
+.sidebar-nav .nav-item[data-page="budgets"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.fm-budget-alert-badge {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  color: #fff;
+  background: #d97706;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+.fm-budget-alert-badge.over { background: #dc2626; }
+.fm-budget-alert-badge.near { background: #d97706; }
+.fm-budget-alert-badge[hidden],
+.fm-alert-panel[hidden],
+.fm-alert-toast[hidden] { display: none !important; }
+/* Danh sach canh bao nam trong trang Ngan sach, khong che noi dung trang khac */
+.fm-alert-panel {
+  position: static;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 12px 0 18px;
+  padding: 16px;
+  border: 1px solid #fed7aa;
+  border-radius: 14px;
+  background: #fffdf7;
+}
+.fm-alert-heading { display: flex; align-items: center; gap: 10px; }
+.fm-alert-heading strong { font-size: 15px; color: #92400e; }
+.fm-alert-period { font-size: 12px; color: #64748b; margin: 10px 0; }
+.fm-alert-empty { background: #f8fafc; border-radius: 10px; padding: 12px; color: #475569; font-size: 13px; }
+.fm-alert-item { display: grid; gap: 5px; padding: 12px; border-radius: 12px; margin: 9px 0; border: 1px solid #fde68a; background: #fffbeb; }
+.fm-alert-item.over { border-color: #fecdd3; background: #fff1f2; }
+.fm-alert-item strong { font-size: 13px; color: #92400e; }
+.fm-alert-item.over strong { color: #be123c; }
+.fm-alert-item span { font-size: 12px; line-height: 1.5; color: #475569; }
+/* Thong bao noi khi VUA cham moc 80% hoac 100%: giu nguyen hanh vi cu */
+.fm-alert-toast {
+  position: fixed;
+  z-index: 10025;
+  bottom: 20px;
+  right: 18px;
+  width: min(380px, calc(100vw - 36px));
+  padding: 14px 16px;
+  border-radius: 13px;
+  border: 1px solid #fbbf24;
+  background: #fffbeb;
+  color: #92400e;
+  box-shadow: 0 10px 35px rgba(15,23,42,.15);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.fm-alert-toast.over { background: #fff1f2; border-color: #fda4af; color: #be123c; }
+@media (max-width: 768px) {
+  .fm-budget-alert-badge { min-width: 18px; height: 18px; font-size: 10px; }
+  .fm-alert-panel { padding: 12px; }
+  .fm-alert-toast { bottom: 12px; right: 8px; width: calc(100vw - 16px); box-sizing: border-box; }
+}

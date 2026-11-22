@@ -1,0 +1,22 @@
+/* Finance Manager — bộ lọc thống kê nhiều khoảng thời gian */
+.fm-stats-toolbar { align-items:flex-start; }
+.fm-stats-filters { display:flex; align-items:flex-end; justify-content:flex-end; gap:10px; flex-wrap:wrap; min-width:0; }
+.fm-stats-field { display:flex; flex-direction:column; gap:6px; min-width:0; }
+.fm-stats-field label { font-size:12px; font-weight:700; color:#475569; }
+.fm-stats-field input, .fm-stats-field select { box-sizing:border-box; font:inherit; font-size:13px; min-height:42px; padding:8px 10px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; min-width:0; max-width:100%; }
+#stats-period { min-width:175px; }
+#stats-month { width:170px; }
+#stats-year { width:112px; }
+#stats-quarter { min-width:145px; }
+.fm-stats-custom-fields { display:flex; gap:10px; flex-wrap:wrap; }
+.fm-stats-custom-fields input { width:155px; }
+.fm-stats-filters [hidden], .fm-stats-custom-fields[hidden] { display:none !important; }
+@media(max-width:700px) {
+  .fm-stats-toolbar {flex-direction:column;}
+  .fm-stats-filters {width:100%; justify-content:flex-start;}
+  .fm-stats-field {flex:1 1 130px;}
+  #stats-period, #stats-month, #stats-year, #stats-quarter {width:100%; min-width:0;}
+  .fm-stats-custom-fields {width:100%;}
+  .fm-stats-custom-fields .fm-stats-field {flex:1 1 130px;}
+  .fm-stats-custom-fields input {width:100%;}
+}
